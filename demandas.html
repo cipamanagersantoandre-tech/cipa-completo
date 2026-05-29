@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPA - Gestão de Demandas e Fluxograma</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #0ea5e9;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --radius: 0.5rem;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--gray-900);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        header {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--gray-500);
+        }
+
+        /* Navegação por abas */
+        nav {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.25rem;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--gray-700);
+            cursor: pointer;
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Seções */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards e containers */
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        /* Filtros */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--gray-300);
+            border-radius: calc(var(--radius) - 0.125rem);
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        /* Tabelas */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--gray-50);
+        }
+
+        th {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-purple { background: #f3e8ff; color: #6b21a8; }
+
+        /* Botões */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: calc(var(--radius) - 0.125rem);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Select de status inline */
+        .status-select {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-size: 0.875rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+            padding: 0.5rem;
+        }
+
+        .btn-close:hover {
+            color: #000;
+        }
+
+        /* Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--gray-500);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Fluxograma */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .flow-item {
+            background: var(--gray-50);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            padding: 1rem;
+            position: relative;
+        }
+
+        .flow-item.status-concluida {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .flow-item.status-andamento {
+            border-color: var(--secondary);
+            background: #f0f9ff;
+        }
+
+        .flow-item.status-pendente {
+            border-color: var(--warning);
+            background: #fffbeb;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .flow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .flow-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid var(--primary);
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .detail-section {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .detail-section h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .flow-meta {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            nav, .filters, .btn, .btn-close, header, .stats-grid, #demandas, #fluxograma, .section {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none;
+                break-inside: avoid;
+            }
+            .modal {
+                position: static !important;
+                display: block !important;
+                background: none !important;
+                padding: 0 !important;
+            }
+            .modal-content {
+                max-height: none !important;
+                overflow-y: visible !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+            .modal-header {
+                position: static !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 CIPA - Gestão de Demandas e Fluxograma</h1>
+            <p>Acompanhe o status das demandas e visualize o fluxo de trabalho</p>
+            <button class="btn btn-primary" onclick="sincronizarTudo()" style="margin-top: 0.75rem;">
+                🔄 Sincronizar com a Nuvem
+            </button>
+        </header>
+
+        <!-- Navegação -->
+        <nav>
+            <button class="nav-btn active" onclick="showSection('demandas', this)">📝 Demandas</button>
+            <button class="nav-btn" onclick="showSection('fluxograma', this)">📈 Fluxograma</button>
+        </nav>
+
+        <div id="alertContainer"></div>
+
+        <!-- SEÇÃO DE DEMANDAS -->
+        <div id="demandas" class="section active">
+            <!-- Estatísticas -->
+            <div class="stats-grid" id="statsDemandas"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📝 Lista de Demandas</h2>
+                    <button class="btn btn-primary btn-sm" onclick="carregarDemandas()">
+                        🔄 Atualizar
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>🔍 Buscar</label>
+                        <input type="text" id="searchDemanda" placeholder="Pesquisar demandas..." onkeyup="filtrarDemandas()">
+                    </div>
+                    <div class="filter-group">
+                        <label>Setor</label>
+                        <select id="filterSetor" onchange="filtrarDemandas()">
+                            <option value="">Todos os Setores</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="filterStatus" onchange="filtrarDemandas()">
+                            <option value="">Todos os Status</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em andamento">Em andamento</option>
+                            <option value="Concluído">Concluído</option>
+                            <option value="Indeferido">Indeferido</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Prioridade</label>
+                        <select id="filterPrioridade" onchange="filtrarDemandas()">
+                            <option value="">Todas</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Média">Média</option>
+                            <option value="Baixa">Baixa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Demandas -->
+                <div id="demandasList"></div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO DE FLUXOGRAMA -->
+        <div id="fluxograma" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📈 Fluxograma de Tarefas</h2>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <select id="selectAtaFluxo" onchange="carregarFluxograma()" style="padding: 0.5rem; border-radius: var(--radius); border: 1px solid var(--gray-300);">
+                            <option value="">Todas as ATAs</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="carregarFluxograma()">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div id="fluxogramaContainer"></div>
+            </div>
+        </div>
+
+        <!-- Modal de Detalhes -->
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Detalhes</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm btn-primary" onclick="window.print()" title="Imprimir" style="font-size: 1.2rem;">🖨️</button>
+                        <button class="btn-close" onclick="closeModal()">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO - MESMA API DO APP ORIGINAL
+        const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbw-_b9zaNoQLblv0iivgKc8zCZyGm_dsgLoAKJjCAfSP-wD1x-YeeAtbvLbx6PBJsokHw/exec';
+        
+        let todasDemandas = [];
+        let todosFluxogramas = {};
+        let todasAtas = [];
+
+        // ===== NAVEGAÇÃO POR ABAS =====
+        function showSection(sectionId, btn) {
+            // Atualizar abas
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            if (btn) btn.classList.add('active');
+            
+            // Carregar dados da aba
+            if (sectionId === 'demandas') carregarDemandas();
+            if (sectionId === 'fluxograma') carregarFluxograma();
+        }
+
+        // ===== ALERTAS =====
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<span>${icons[type] || ''}</span> ${message}`;
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 4000);
+        }
+
+        // ===== SINCRONIZAR TUDO =====
+        async function sincronizarTudo() {
+            showAlert('🔄 Sincronizando dados da nuvem...', 'info');
+            
+            try {
+                await carregarAtas();
+                await carregarDemandas();
+                await carregarFluxograma();
+                showAlert('✅ Todos os dados sincronizados com sucesso!', 'success');
+            } catch (e) {
+                console.error('Erro ao sincronizar:', e);
+                showAlert('❌ Erro ao sincronizar com a nuvem', 'error');
+            }
+        }
+
+
+        // ===== INICIALIZAÇÃO =====
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarAtas();
+            carregarDemandas();
+        });
+
+        // ===== CARREGAR ATAS (PARA O FLUXOGRAMA) =====
+        async function carregarAtas() {
+            try {
+                const response = await fetch(`${GOOGLE_API_URL}?acao=carregarTudo&aba=atas&_=${Date.now()}`);
+                const result = await response.json();
+                
+                if (result.status === 'sucesso' && result.dados) {
+                    todasAtas = result.dados
+                        .map(item => {
+                            try { return JSON.parse(item.dados); } 
+                            catch (e) { return null; }
+                        })
+                        .filter(ata => ata !== null);
+                    
+                    // Preencher select de ATAs para o fluxograma
+                    const select = document.getElementById('selectAtaFluxo');
+                    select.innerHTML = '<option value="">Todas as ATAs</option>' + 
+                        todasAtas
+                            .sort((a, b) => b.timestamp - a.timestamp)
+                            .map(ata => `<option value="${ata.id}">${formatDate(ata.secao1?.dataReuniao)} - ${ata.unidade || 'Sem unidade'}</option>`)
+                            .join('');
+                }
+            } catch (e) {
+                console.error('Erro ao carregar atas:', e);
+            }
+        }
+
+        // ===== CARREGAR DEMANDAS =====
+        async function carregarDemandas() {
+            try {
+                document.getElementById('demandasList').innerHTML = '<div class="loading">🔄 Carregando demandas...</div>';
+                
+                const response = await fetch(`${GOOGLE_API_URL}?acao=carregarTudo&aba=demandas&_=${Date.now()}`);
+                const result = await response.json();
+                
+                if (result.status === 'sucesso' && result.dados) {
+                    todasDemandas = result.dados
+                        .map(item => {
+                            try { return JSON.parse(item.dados); } 
+                            catch (e) { return null; }
+                        })
+                        .filter(d => d !== null);
+                    
+                    atualizarStatsDemandas();
+                    preencherFiltroSetores();
+                    mostrarDemandas(todasDemandas);
+                } else {
+                    document.getElementById('demandasList').innerHTML = 
+                        '<div class="empty-state">📝 Nenhuma demanda encontrada</div>';
+                    atualizarStatsDemandas();
+                }
+            } catch (e) {
+                console.error('Erro ao carregar demandas:', e);
+                document.getElementById('demandasList').innerHTML = 
+                    '<div class="empty-state">❌ Erro ao carregar demandas</div>';
+            }
+        }
+
+        // ===== ESTATÍSTICAS DE DEMANDAS =====
+        function atualizarStatsDemandas() {
+            const stats = {
+                total: todasDemandas.length,
+                pendentes: todasDemandas.filter(d => d.status === 'Pendente').length,
+                andamento: todasDemandas.filter(d => d.status === 'Em andamento').length,
+                concluidas: todasDemandas.filter(d => d.status === 'Concluído').length
+            };
+            
+            document.getElementById('statsDemandas').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.total}</div>
+                    <div class="stat-label">Total de Demandas</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--warning);">
+                    <div class="stat-value">${stats.pendentes}</div>
+                    <div class="stat-label">Pendentes</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--secondary);">
+                    <div class="stat-value">${stats.andamento}</div>
+                    <div class="stat-label">Em Andamento</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success);">
+                    <div class="stat-value">${stats.concluidas}</div>
+                    <div class="stat-label">Concluídas</div>
+                </div>
+            `;
+        }
+
+        // ===== PREENCHER FILTRO DE SETORES =====
+        function preencherFiltroSetores() {
+            const setores = [...new Set(todasDemandas.map(d => d.setor).filter(Boolean))].sort();
+            const select = document.getElementById('filterSetor');
+            select.innerHTML = '<option value="">Todos os Setores</option>' + 
+                setores.map(s => `<option value="${s}">${s}</option>`).join('');
+        }
+
+        // ===== FILTRAR DEMANDAS =====
+        function filtrarDemandas() {
+            const busca = (document.getElementById('searchDemanda')?.value || '').toLowerCase();
+            const setor = document.getElementById('filterSetor')?.value || '';
+            const status = document.getElementById('filterStatus')?.value || '';
+            const prioridade = document.getElementById('filterPrioridade')?.value || '';
+            
+            let filtradas = [...todasDemandas];
+            
+            if (busca) {
+                filtradas = filtradas.filter(d => 
+                    (d.descricao && d.descricao.toLowerCase().includes(busca)) ||
+                    (d.setor && d.setor.toLowerCase().includes(busca)) ||
+                    (d.solicitante && d.solicitante.toLowerCase().includes(busca)) ||
+                    (d.responsavel && d.responsavel.toLowerCase().includes(busca)) ||
+                    (d.origem && d.origem.toLowerCase().includes(busca))
+                );
+            }
+            
+            if (setor) filtradas = filtradas.filter(d => d.setor === setor);
+            if (status) filtradas = filtradas.filter(d => d.status === status);
+            if (prioridade) filtradas = filtradas.filter(d => d.prioridade === prioridade);
+            
+            mostrarDemandas(filtradas);
+        }
+
+        // ===== MOSTRAR DEMANDAS NA TABELA =====
+        function mostrarDemandas(demandas) {
+            const container = document.getElementById('demandasList');
+            
+            if (demandas.length === 0) {
+                container.innerHTML = '<div class="empty-state">🔍 Nenhuma demanda encontrada com esses filtros</div>';
+                return;
+            }
+            
+            // Ordenar por prioridade e data
+            demandas.sort((a, b) => {
+                const prioridade = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+                const compPrioridade = (prioridade[b.prioridade] || 0) - (prioridade[a.prioridade] || 0);
+                if (compPrioridade !== 0) return compPrioridade;
+                return new Date(b.dataCriacao) - new Date(a.dataCriacao);
+            });
+            
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Setor</th>
+                                <th>Demanda</th>
+                                <th>Origem</th>
+                                <th>Solicitante</th>
+                                <th>Responsável</th>
+                                <th>Prazo</th>
+                                <th>Prioridade</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${demandas.map(demanda => {
+                                const hoje = new Date();
+                                hoje.setHours(0, 0, 0, 0);
+                                const prazoDate = new Date(demanda.prazo + 'T00:00:00');
+                                const diasRestantes = Math.ceil((prazoDate - hoje) / (1000 * 60 * 60 * 24));
+                                const prazoVencido = diasRestantes < 0 && demanda.status !== 'Concluído' && demanda.status !== 'Indeferido';
+                                
+                                return `
+                                <tr style="${demanda.prioridade === 'Alta' ? 'background: #fef2f2;' : ''}${prazoVencido ? 'border-left: 4px solid var(--danger);' : ''}">
+                                    <td><span class="badge badge-info">${demanda.setor || 'N/I'}</span></td>
+                                    <td>
+                                        <div style="max-width: 250px;">
+                                            <strong>${demanda.descricao || 'Sem descrição'}</strong>
+                                            ${demanda.observacoes ? `<br><small style="color: var(--gray-500);">Obs: ${demanda.observacoes.substring(0, 50)}...</small>` : ''}
+                                        </div>
+                                    </td>
+                                    <td>${demanda.origem || 'N/I'}</td>
+                                    <td>${demanda.solicitante || 'N/I'}</td>
+                                    <td>${demanda.responsavel || 'Não definido'}</td>
+                                    <td>
+                                        <span style="${prazoVencido ? 'color: var(--danger); font-weight: bold;' : ''}">
+                                            ${formatDate(demanda.prazo)}
+                                            ${!prazoVencido && demanda.status !== 'Concluído' && demanda.status !== 'Indeferido' ? 
+                                                `<br><small>(${diasRestantes} dias)</small>` : 
+                                                prazoVencido ? '<br><small>⚠️ Vencido!</small>' : ''
+                                            }
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-${demanda.prioridade === 'Alta' ? 'danger' : demanda.prioridade === 'Média' ? 'warning' : 'info'}">
+                                            ${demanda.prioridade || 'Média'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <select class="status-select" 
+                                                onchange="atualizarStatusDemanda('${demanda.id}', this.value)"
+                                                style="background: ${getStatusBgColor(demanda.status)}; color: ${getStatusTextColor(demanda.status)};">
+                                            <option value="Pendente" ${demanda.status === 'Pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                                            <option value="Em andamento" ${demanda.status === 'Em andamento' ? 'selected' : ''}>🔄 Em andamento</option>
+                                            <option value="Concluído" ${demanda.status === 'Concluído' ? 'selected' : ''}>✅ Concluído</option>
+                                            <option value="Indeferido" ${demanda.status === 'Indeferido' ? 'selected' : ''}>❌ Indeferido</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="verDetalhesDemanda('${demanda.id}')" title="Ver detalhes">
+                                            👁️ Ver
+                                        </button>
+                                    </td>
+                                </tr>
+                            `}).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // ===== ATUALIZAR STATUS DA DEMANDA =====
+        async function atualizarStatusDemanda(id, novoStatus) {
+            const demanda = todasDemandas.find(d => d.id === id);
+            if (!demanda) return;
+            
+            // Mostrar indicador de carregamento
+            showAlert('⏳ Atualizando status...', 'info');
+            
+            const statusAnterior = demanda.status;
+            demanda.status = novoStatus;
+            demanda.dataAtualizacao = new Date().toISOString();
+            
+            try {
+                const dadosStr = encodeURIComponent(JSON.stringify(demanda));
+                const response = await fetch(
+                    `${GOOGLE_API_URL}?acao=salvar&aba=demandas&id=${encodeURIComponent(id)}&dados=${dadosStr}`
+                );
+                const result = await response.json();
+                
+                if (result.status === 'sucesso') {
+                    showAlert(`✅ Status atualizado: ${statusAnterior} → ${novoStatus}`, 'success');
+                    // Atualizar estatísticas
+                    atualizarStatsDemandas();
+                } else {
+                    demanda.status = statusAnterior;
+                    showAlert('❌ Erro ao atualizar status', 'error');
+                    filtrarDemandas();
+                }
+            } catch (e) {
+                demanda.status = statusAnterior;
+                console.error('Erro ao atualizar:', e);
+                showAlert('❌ Erro de conexão ao atualizar', 'error');
+                filtrarDemandas();
+            }
+        }
+
+        // ===== VER DETALHES DA DEMANDA =====
+        function verDetalhesDemanda(id) {
+            const demanda = todasDemandas.find(d => d.id === id);
+            if (!demanda) return;
+            
+            document.getElementById('modalTitle').textContent = '📝 Detalhes da Demanda';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="detail-section">
+                    <h4>Informações Gerais</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <p><strong>Setor:</strong> <span class="badge badge-info">${demanda.setor || 'N/I'}</span></p>
+                        <p><strong>Status:</strong> <span class="badge badge-${getStatusBadgeColor(demanda.status)}">${demanda.status || 'Pendente'}</span></p>
+                        <p><strong>Prioridade:</strong> <span class="badge badge-${demanda.prioridade === 'Alta' ? 'danger' : demanda.prioridade === 'Média' ? 'warning' : 'info'}">${demanda.prioridade || 'Média'}</span></p>
+                        <p><strong>Prazo:</strong> ${formatDate(demanda.prazo)}</p>
+                        <p><strong>Solicitante:</strong> ${demanda.solicitante || 'N/I'}</p>
+                        <p><strong>Responsável:</strong> ${demanda.responsavel || 'Não definido'}</p>
+                        <p><strong>Origem:</strong> ${demanda.origem || 'N/I'}</p>
+                        <p><strong>Criado em:</strong> ${demanda.dataCriacao ? new Date(demanda.dataCriacao).toLocaleString('pt-BR') : 'N/I'}</p>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h4>Descrição da Demanda</h4>
+                    <p style="white-space: pre-wrap;">${demanda.descricao || 'Não informada'}</p>
+                </div>
+                
+                ${demanda.conclusao ? `
+                    <div class="detail-section" style="background: ${demanda.status === 'Concluído' ? '#dcfce7' : '#fee2e2'};">
+                        <h4>Conclusão</h4>
+                        <p style="white-space: pre-wrap;">${demanda.conclusao}</p>
+                    </div>
+                ` : ''}
+                
+                ${demanda.observacoes ? `
+                    <div class="detail-section">
+                        <h4>Observações</h4>
+                        <p style="white-space: pre-wrap;">${demanda.observacoes}</p>
+                    </div>
+                ` : ''}
+                
+                <div class="detail-section">
+                    <h4>Alterar Status</h4>
+                    <select class="status-select" 
+                            onchange="atualizarStatusDemanda('${demanda.id}', this.value); verDetalhesDemanda('${demanda.id}');"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        <option value="Pendente" ${demanda.status === 'Pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                        <option value="Em andamento" ${demanda.status === 'Em andamento' ? 'selected' : ''}>🔄 Em andamento</option>
+                        <option value="Concluído" ${demanda.status === 'Concluído' ? 'selected' : ''}>✅ Concluído</option>
+                        <option value="Indeferido" ${demanda.status === 'Indeferido' ? 'selected' : ''}>❌ Indeferido</option>
+                    </select>
+                </div>
+            `;
+            
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        // ===== CARREGAR FLUXOGRAMA =====
+        async function carregarFluxograma() {
+            try {
+                document.getElementById('fluxogramaContainer').innerHTML = '<div class="loading">🔄 Carregando fluxograma...</div>';
+                
+                const response = await fetch(`${GOOGLE_API_URL}?acao=carregarTudo&aba=fluxogramas&_=${Date.now()}`);
+                const result = await response.json();
+                
+                if (result.status === 'sucesso' && result.dados) {
+                    todosFluxogramas = {};
+                    
+                    result.dados.forEach(item => {
+                        try {
+                            const tarefas = JSON.parse(item.dados);
+                            // SÓ adicionar se tiver tarefas E se a ATA existir
+                            if (Array.isArray(tarefas) && tarefas.length > 0) {
+                                const ataId = item.id || (tarefas[0] && tarefas[0].ataId) || 'sem-ata';
+                                
+                                // Verificar se a ATA realmente existe
+                                const ataExiste = todasAtas.some(a => a.id === ataId);
+                                if (ataExiste || ataId === 'sem-ata') {
+                                    todosFluxogramas[ataId] = tarefas;
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Erro ao processar fluxograma:', e);
+                        }
+                    });
+                    
+                    mostrarFluxograma();
+                } else {
+                    document.getElementById('fluxogramaContainer').innerHTML = 
+                        '<div class="empty-state">📈 Nenhum fluxograma encontrado</div>';
+                }
+            } catch (e) {
+                console.error('Erro ao carregar fluxograma:', e);
+                document.getElementById('fluxogramaContainer').innerHTML = 
+                    '<div class="empty-state">❌ Erro ao carregar fluxograma</div>';
+            }
+        }
+
+        // ===== MOSTRAR FLUXOGRAMA =====
+        function mostrarFluxograma() {
+            const container = document.getElementById('fluxogramaContainer');
+            const ataIdFiltro = document.getElementById('selectAtaFluxo')?.value || '';
+            
+            // Filtrar por ATA se selecionado
+            let fluxosFiltrados = {};
+            if (ataIdFiltro) {
+                if (todosFluxogramas[ataIdFiltro]) {
+                    fluxosFiltrados[ataIdFiltro] = todosFluxogramas[ataIdFiltro];
+                }
+            } else {
+                fluxosFiltrados = { ...todosFluxogramas };
+            }
+            
+            const ataIds = Object.keys(fluxosFiltrados);
+            
+            if (ataIds.length === 0) {
+                container.innerHTML = '<div class="empty-state">📈 Nenhuma tarefa no fluxograma</div>';
+                return;
+            }
+            
+            let html = '';
+            
+            ataIds.forEach(ataId => {
+                const tarefas = fluxosFiltrados[ataId];
+                const ata = todasAtas.find(a => a.id === ataId);
+                
+                // Título do grupo
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <div style="background: var(--primary); color: white; padding: 1rem 1.5rem; border-radius: var(--radius) var(--radius) 0 0; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0;">📋 ${ata ? `${formatDate(ata.secao1?.dataReuniao)} - ${ata.unidade || 'Sem unidade'}` : 'Tarefas sem ATA vinculada'}</h3>
+                                ${ata ? `<p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; opacity: 0.9;">${ata.secao1?.local || ''} | ${ata.secao1?.horaInicio || ''}</p>` : ''}
+                            </div>
+                            <span class="badge" style="background: rgba(255,255,255,0.3); color: white;">
+                                ${tarefas.length} tarefa${tarefas.length > 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <div style="background: white; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 1rem;">
+                            <div class="flow-container">
+                                ${tarefas.map((tarefa, index) => `
+                                    <div class="flow-item status-${getStatusFlowClass(tarefa.status)}">
+                                        <div class="flow-header">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <span style="font-size: 1.5rem;">${getStatusEmoji(tarefa.status)}</span>
+                                                <h4 style="margin: 0;">${tarefa.descricao || 'Sem descrição'}</h4>
+                                            </div>
+                                            <select class="status-select" 
+                                                    onchange="atualizarStatusTarefa('${ataId}', ${index}, this.value)"
+                                                    style="background: ${getStatusBgColor(tarefa.status)}; color: ${getStatusTextColor(tarefa.status)};">
+                                                <option value="Pendente" ${tarefa.status === 'Pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                                                <option value="Em andamento" ${tarefa.status === 'Em andamento' ? 'selected' : ''}>🔄 Em andamento</option>
+                                                <option value="Concluída" ${tarefa.status === 'Concluída' ? 'selected' : ''}>✅ Concluída</option>
+                                            </select>
+                                        </div>
+                                        <div class="flow-meta">
+                                            <span><strong>Responsável:</strong> ${tarefa.responsavel || 'Não definido'}</span>
+                                            <span><strong>Prazo:</strong> ${tarefa.prazo ? formatDate(tarefa.prazo) : 'Não definido'}</span>
+                                            ${tarefa.dependencia ? `<span><strong>Depende de:</strong> ${tarefa.dependencia}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    ${index < tarefas.length - 1 ? '<div class="flow-arrow">⬇️</div>' : ''}
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // ===== ATUALIZAR STATUS DA TAREFA DO FLUXOGRAMA =====
+        async function atualizarStatusTarefa(ataId, tarefaIndex, novoStatus) {
+            if (!todosFluxogramas[ataId] || !todosFluxogramas[ataId][tarefaIndex]) return;
+            
+            const tarefa = todosFluxogramas[ataId][tarefaIndex];
+            tarefa.status = novoStatus;
+            
+            try {
+                const dadosStr = encodeURIComponent(JSON.stringify(todosFluxogramas[ataId]));
+                const response = await fetch(
+                    `${GOOGLE_API_URL}?acao=salvar&aba=fluxogramas&id=${encodeURIComponent(ataId)}&dados=${dadosStr}`
+                );
+                const result = await response.json();
+                
+                if (result.status === 'sucesso') {
+                    showAlert(`✅ Status da tarefa atualizado para: ${novoStatus}`, 'success');
+                    mostrarFluxograma();
+                } else {
+                    showAlert('❌ Erro ao atualizar status', 'error');
+                }
+            } catch (e) {
+                console.error('Erro ao atualizar tarefa:', e);
+                showAlert('❌ Erro de conexão', 'error');
+            }
+        }
+
+        // ===== FECHAR MODAL =====
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // ===== FUNÇÕES AUXILIARES =====
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/I';
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function getStatusBadgeColor(status) {
+            const colors = {
+                'Pendente': 'warning',
+                'Em andamento': 'info',
+                'Concluído': 'success',
+                'Indeferido': 'danger'
+            };
+            return colors[status] || 'info';
+        }
+
+        function getStatusFlowClass(status) {
+            const classes = {
+                'Pendente': 'pendente',
+                'Em andamento': 'andamento',
+                'Concluída': 'concluida'
+            };
+            return classes[status] || 'pendente';
+        }
+
+        function getStatusEmoji(status) {
+            const emojis = {
+                'Pendente': '⏳',
+                'Em andamento': '🔄',
+                'Concluída': '✅'
+            };
+            return emojis[status] || '⏳';
+        }
+
+        function getStatusBgColor(status) {
+            const colors = {
+                'Pendente': '#fef3c7',
+                'Em andamento': '#dbeafe',
+                'Concluído': '#dcfce7',
+                'Concluída': '#dcfce7',
+                'Indeferido': '#fee2e2'
+            };
+            return colors[status] || '#f9fafb';
+        }
+
+        function getStatusTextColor(status) {
+            const colors = {
+                'Pendente': '#92400e',
+                'Em andamento': '#1e40af',
+                'Concluído': '#166534',
+                'Concluída': '#166534',
+                'Indeferido': '#991b1b'
+            };
+            return colors[status] || '#374151';
+        }
+    </script>
+</body>
+</html>

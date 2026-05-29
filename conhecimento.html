@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Conhecimento CIPA - Consulta</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-500: #6b7280;
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-sync {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-sync:hover {
+            background: #1e3a8a;
+        }
+
+        .btn-sync:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .search-bar {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+        }
+
+        .articles-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .article-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .article-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgb(0 0 0 / 0.15);
+        }
+
+        .article-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .article-title {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+
+        .article-preview {
+            padding: 1.5rem;
+            color: #4b5563;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+            padding: 0.5rem;
+        }
+
+        .btn-close:hover {
+            color: #000;
+        }
+
+        .btn-print {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 0.5rem;
+        }
+
+        .btn-print:hover {
+            color: #1e3a8a;
+        }
+
+        .article-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+        }
+
+        .section-question {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+        }
+
+        .section-analysis {
+            background: #dbeafe;
+            border-left: 4px solid var(--primary);
+        }
+
+        .section-answer {
+            background: #dcfce7;
+            border-left: 4px solid var(--success);
+        }
+
+        .section-legal {
+            background: var(--gray-100);
+            border-left: 4px solid var(--gray-500);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--primary);
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1001;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .filters {
+                flex-direction: column;
+            }
+            .btn-sync {
+                position: static;
+                margin-top: 1rem;
+                justify-content: center;
+            }
+            header {
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+
+        @media print {
+            .search-bar, .btn-close, .btn-sync, .btn-print, header {
+                display: none;
+            }
+            body {
+                background: white;
+                padding: 0;
+            }
+            .article-card {
+                box-shadow: none;
+                break-inside: avoid;
+            }
+            .modal {
+                position: static !important;
+                display: block !important;
+                background: none !important;
+                padding: 0 !important;
+            }
+            .modal-content {
+                max-height: none !important;
+                overflow-y: visible !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+            .modal-header {
+                position: static !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Base de Conhecimento CIPA</h1>
+            <p style="color: var(--gray-500); margin-top: 0.5rem;">
+                Consulte dúvidas frequentes, legislação e orientações
+            </p>
+            <button class="btn-sync" id="btnSync" onclick="sincronizarManualmente()">
+                🔄 Sincronizar
+            </button>
+        </header>
+
+        <div class="search-bar">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="🔍 Pesquise por título, categoria ou palavras-chave..."
+                onkeyup="filtrarArtigos()"
+            >
+            <div class="filters">
+                <select class="filter-select" id="filterCategory" onchange="filtrarArtigos()">
+                    <option value="">Todas as Categorias</option>
+                    <option value="Dúvida CIPA">Dúvida CIPA</option>
+                    <option value="Legislação">Legislação</option>
+                    <option value="Procedimento">Procedimento</option>
+                    <option value="Segurança">Segurança</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Normas">Normas</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <select class="filter-select" id="filterStatus" onchange="filtrarArtigos()">
+                    <option value="">Todos os Status</option>
+                    <option value="Ativo">Ativos</option>
+                    <option value="Revisão Pendente">Revisão Pendente</option>
+                    <option value="Arquivado">Arquivado</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="articlesContainer">
+            <div class="loading">🔄 Carregando artigos da base de conhecimento...</div>
+        </div>
+    </div>
+
+    <div id="articleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-print" onclick="imprimirArtigo()" title="Imprimir artigo">🖨️</button>
+                    <button class="btn-close" onclick="fecharModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <script>
+        // CONFIGURAÇÃO - MESMA API DO APP ORIGINAL
+        const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbw-_b9zaNoQLblv0iivgKc8zCZyGm_dsgLoAKJjCAfSP-wD1x-YeeAtbvLbx6PBJsokHw/exec';
+        
+let todosArtigos = [];
+let carregando = false;
+let artigoAtual = null; // <--- ADICIONE ESTA LINHA
+
+        // Função para mostrar alerta
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span> ${message}`;
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        // FUNÇÃO DE SINCRONIZAÇÃO MANUAL
+        async function sincronizarManualmente() {
+            const btn = document.getElementById('btnSync');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Sincronizando...';
+            
+            showAlert('🔄 Iniciando sincronização com a nuvem...', 'info');
+            await carregarArtigos(true);
+            
+            btn.disabled = false;
+            btn.innerHTML = '🔄 Sincronizar';
+        }
+
+        // CARREGAR ARTIGOS DA NUVEM (CORRIGIDO)
+        async function carregarArtigos(forcarRecarga = false) {
+            if (carregando) return;
+            carregando = true;
+            
+            try {
+                document.getElementById('articlesContainer').innerHTML = 
+                    '<div class="loading">🔄 Carregando artigos da base de conhecimento...</div>';
+                
+                // Construir URL corretamente
+                const url = `${GOOGLE_API_URL}?acao=carregarTudo&aba=base_conhecimento&_=${Date.now()}`;
+                console.log('Buscando dados de:', url);
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Resposta da API:', result);
+                
+                if (result.status === 'sucesso' && result.dados) {
+                    // Converter os dados
+                    const artigosRaw = result.dados
+                        .map(item => {
+                            try {
+                                // Se for string JSON, parseia
+                                if (typeof item.dados === 'string') {
+                                    return JSON.parse(item.dados);
+                                }
+                                // Se já for objeto, retorna
+                                if (typeof item.dados === 'object') {
+                                    return item.dados;
+                                }
+                                return null;
+                            } catch (e) {
+                                console.error('Erro ao parsear item:', e, item);
+                                return null;
+                            }
+                        })
+                        .filter(artigo => artigo !== null);
+                    
+                    console.log('Artigos encontrados:', artigosRaw.length);
+                    
+                    // Filtrar e organizar os artigos
+                    todosArtigos = artigosRaw.filter(artigo => {
+                        // Garantir que tenha id e título
+                        return artigo && artigo.id && (artigo.titulo || artigo.pergunta);
+                    });
+                    
+                    console.log('Artigos válidos:', todosArtigos.length);
+                    
+                    // Ordenar do mais recente para o mais antigo
+                    todosArtigos.sort((a, b) => {
+                        const dataA = a.dataAtualizacao || a.dataCriacao || a.data || '2000-01-01';
+                        const dataB = b.dataAtualizacao || b.dataCriacao || b.data || '2000-01-01';
+                        return new Date(dataB) - new Date(dataA);
+                    });
+                    
+                    if (todosArtigos.length === 0) {
+                        document.getElementById('articlesContainer').innerHTML = 
+                            '<div class="empty-state">📚 Nenhum artigo encontrado na base de conhecimento</div>';
+                        showAlert('Nenhum artigo encontrado. Cadastre artigos no sistema CIPA Manager primeiro.', 'info');
+                    } else {
+                        // Mostrar todos os artigos por padrão (sem filtrar por status)
+                        mostrarArtigos(todosArtigos);
+                        showAlert(`✅ ${todosArtigos.length} artigos carregados com sucesso!`, 'success');
+                    }
+                } else {
+                    console.error('Resposta sem sucesso:', result);
+                    document.getElementById('articlesContainer').innerHTML = 
+                        '<div class="empty-state">❌ Erro ao carregar dados da API<br><small>Verifique a conexão com a internet</small></div>';
+                    showAlert('Erro ao carregar artigos: resposta da API inválida', 'error');
+                }
+            } catch (e) {
+                console.error('Erro ao carregar artigos:', e);
+                document.getElementById('articlesContainer').innerHTML = 
+                    `<div class="empty-state">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+                        <p>Erro ao carregar artigos</p>
+                        <p style="font-size: 0.875rem; color: var(--danger);">${e.message}</p>
+                        <p style="font-size: 0.875rem; margin-top: 1rem;">💡 Dica: Verifique se você está conectado à internet</p>
+                    </div>`;
+                showAlert('Erro ao carregar: ' + e.message, 'error');
+            } finally {
+                carregando = false;
+            }
+        }
+
+        // MOSTRAR ARTIGOS NA TELA
+        function mostrarArtigos(artigos) {
+            const container = document.getElementById('articlesContainer');
+            
+            if (!artigos || artigos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                        <p>Nenhum artigo encontrado com esses filtros</p>
+                        <p style="font-size: 0.875rem;">Tente ajustar sua busca ou remover os filtros</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="articles-grid">
+                    ${artigos.map(artigo => `
+                        <div class="article-card" onclick="visualizarArtigo('${artigo.id}')">
+                            <div class="article-header">
+                                <h3 class="article-title">${escapeHtml(artigo.titulo || 'Sem título')}</h3>
+                                <div class="article-meta">
+                                    <span class="badge badge-info">${artigo.categoria || 'Geral'}</span>
+                                    ${artigo.data ? `<span>📅 ${formatarData(artigo.data)}</span>` : ''}
+                                    ${artigo.origem ? `<span>👤 ${escapeHtml(artigo.origem)}</span>` : ''}
+                                    ${artigo.tags ? `<span>🏷️ ${escapeHtml(artigo.tags)}</span>` : ''}
+                                    ${artigo.status ? `<span class="badge ${artigo.status === 'Ativo' ? 'badge-success' : artigo.status === 'Revisão Pendente' ? 'badge-warning' : 'badge-danger'}">${artigo.status}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="article-preview">
+                                ${artigo.pergunta ? `
+                                    <p><strong>❓ Dúvida:</strong> ${escapeHtml(artigo.pergunta.substring(0, 150))}${artigo.pergunta.length > 150 ? '...' : ''}</p>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // FUNÇÃO PARA ESCAPAR HTML (segurança)
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // FILTRAR ARTIGOS
+        function filtrarArtigos() {
+            const busca = document.getElementById('searchInput').value.toLowerCase();
+            const categoria = document.getElementById('filterCategory').value;
+            const statusFiltro = document.getElementById('filterStatus').value;
+            
+            let filtrados = [...todosArtigos];
+            
+            // Filtro por busca
+            if (busca) {
+                filtrados = filtrados.filter(artigo => 
+                    (artigo.titulo && artigo.titulo.toLowerCase().includes(busca)) ||
+                    (artigo.tags && artigo.tags.toLowerCase().includes(busca)) ||
+                    (artigo.categoria && artigo.categoria.toLowerCase().includes(busca)) ||
+                    (artigo.pergunta && artigo.pergunta.toLowerCase().includes(busca)) ||
+                    (artigo.resposta && artigo.resposta.toLowerCase().includes(busca))
+                );
+            }
+            
+            // Filtro por categoria
+            if (categoria) {
+                filtrados = filtrados.filter(artigo => artigo.categoria === categoria);
+            }
+            
+            // Filtro por status
+            if (statusFiltro) {
+                filtrados = filtrados.filter(artigo => artigo.status === statusFiltro);
+            }
+            
+            mostrarArtigos(filtrados);
+        }
+
+        // VISUALIZAR ARTIGO COMPLETO
+        function visualizarArtigo(id) {
+            const artigo = todosArtigos.find(a => a.id === id);
+            if (!artigo) return;
+ 	    artigoAtual = artigo;
+            
+            document.getElementById('modalTitle').textContent = artigo.titulo || 'Artigo';
+            
+            document.getElementById('modalBody').innerHTML = `
+                <div class="article-meta" style="margin-bottom: 1.5rem;">
+                    <span class="badge badge-info">${artigo.categoria || 'Geral'}</span>
+                    ${artigo.data ? `<span style="margin-left: 1rem;">📅 ${formatarData(artigo.data)}</span>` : ''}
+                    ${artigo.origem ? `<span style="margin-left: 1rem;">👤 Origem: ${escapeHtml(artigo.origem)}</span>` : ''}
+                    ${artigo.status ? `<span style="margin-left: 1rem;" class="badge ${artigo.status === 'Ativo' ? 'badge-success' : artigo.status === 'Revisão Pendente' ? 'badge-warning' : 'badge-danger'}">${artigo.status}</span>` : ''}
+                    ${artigo.tags ? `<div style="margin-top: 0.5rem;">🏷️ ${artigo.tags.split(',').map(t => `<span class="badge badge-info" style="margin: 0.25rem;">${escapeHtml(t.trim())}</span>`).join(' ')}</div>` : ''}
+                </div>
+                
+                ${artigo.pergunta ? `
+                    <div class="article-section section-question">
+                        <h3 style="color: #92400e; margin-bottom: 0.5rem;">❓ Pergunta / Dúvida</h3>
+                        <p style="white-space: pre-wrap;">${escapeHtml(artigo.pergunta)}</p>
+                    </div>
+                ` : ''}
+                
+                ${artigo.analise ? `
+                    <div class="article-section section-analysis">
+                        <h3 style="color: #1e40af; margin-bottom: 0.5rem;">🔍 Análise da CIPA</h3>
+                        <p style="white-space: pre-wrap;">${escapeHtml(artigo.analise)}</p>
+                    </div>
+                ` : ''}
+                
+                ${artigo.resposta ? `
+                    <div class="article-section section-answer">
+                        <h3 style="color: #166534; margin-bottom: 0.5rem;">✅ Resposta / Esclarecimento</h3>
+                        <p style="white-space: pre-wrap;">${escapeHtml(artigo.resposta)}</p>
+                    </div>
+                ` : ''}
+                
+                ${artigo.fundamentacao ? `
+                    <div class="article-section section-legal">
+                        <h3 style="color: var(--gray-700); margin-bottom: 0.5rem;">📖 Fundamentação Legal</h3>
+                        <p style="white-space: pre-wrap;">${escapeHtml(artigo.fundamentacao)}</p>
+                    </div>
+                ` : ''}
+                
+                <p style="color: var(--gray-500); font-size: 0.875rem; margin-top: 1rem;">
+                    Última atualização: ${artigo.dataAtualizacao ? new Date(artigo.dataAtualizacao).toLocaleString('pt-BR') : 'N/I'}
+                </p>
+            `;
+            
+            document.getElementById('articleModal').classList.add('active');
+        }
+
+        // FECHAR MODAL
+        function fecharModal() {
+            document.getElementById('articleModal').classList.remove('active');
+        }
+
+        // FORMATAR DATA
+        function formatarData(dateStr) {
+            if (!dateStr) return 'N/I';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toLocaleDateString('pt-BR');
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+
+        // IMPRIMIR ARTIGO
+function imprimirArtigo() {
+    if (!artigoAtual) {
+        alert('Nenhum artigo selecionado para impressão');
+        return;
+    }
+    
+    // Cria uma nova janela com apenas o artigo
+    var janelaImpressao = window.open('', '_blank', 'width=800,height=600');
+    janelaImpressao.document.write(gerarHtmlParaImpressao(artigoAtual));
+    janelaImpressao.document.close();
+    janelaImpressao.print();
+}
+
+function gerarHtmlParaImpressao(artigo) {
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${artigo.titulo || 'Artigo CIPA'}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 2rem; max-width: 800px; margin: 0 auto; }
+                h1 { color: #1e40af; border-bottom: 2px solid #1e40af; }
+                .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; background: #dbeafe; color: #1e40af; font-size: 0.75rem; }
+                .section { margin-bottom: 2rem; padding: 1rem; border-left: 4px solid; }
+                .section-question { background: #fef3c7; border-left-color: #f59e0b; }
+                .section-analysis { background: #dbeafe; border-left-color: #1e40af; }
+                .section-answer { background: #dcfce7; border-left-color: #16a34a; }
+                .section-legal { background: #f3f4f6; border-left-color: #6b7280; }
+                .footer { margin-top: 2rem; font-size: 0.8rem; color: #999; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <h1>${artigo.titulo || 'Artigo da Base de Conhecimento CIPA'}</h1>
+            <div><span class="badge">${artigo.categoria || 'Geral'}</span></div>
+            
+            ${artigo.pergunta ? `<div class="section section-question"><h3>❓ Pergunta</h3><p>${artigo.pergunta}</p></div>` : ''}
+            ${artigo.analise ? `<div class="section section-analysis"><h3>🔍 Análise</h3><p>${artigo.analise}</p></div>` : ''}
+            ${artigo.resposta ? `<div class="section section-answer"><h3>✅ Resposta</h3><p>${artigo.resposta}</p></div>` : ''}
+            ${artigo.fundamentacao ? `<div class="section section-legal"><h3>📖 Fundamentação Legal</h3><p>${artigo.fundamentacao}</p></div>` : ''}
+            
+            <div class="footer">Documento gerado pela Base de Conhecimento CIPA</div>
+        </body>
+        </html>
+    `;
+}
+
+        // FECHAR MODAL COM ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') fecharModal();
+        });
+
+        // INICIAR APP
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarArtigos();
+        });
+    </script>
+</body>
+</html>

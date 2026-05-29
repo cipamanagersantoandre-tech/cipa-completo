@@ -1,0 +1,4595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIPA Manager - Gestão de Atas Offline</title>
+<style>
+:root {
+    --primary: #1e40af;
+    --primary-dark: #1e3a8a;
+    --secondary: #0ea5e9;
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --danger: #dc2626;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius: 0.5rem;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: var(--gray-900);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+header {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+header h1 {
+    font-size: 1.875rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.sync-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.sync-status.syncing {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.sync-status.synced {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.sync-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+nav {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+}
+
+.nav-btn {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: transparent;
+    color: var(--gray-700);
+    cursor: pointer;
+    border-radius: calc(var(--radius) - 0.25rem);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+.nav-btn:hover {
+    background: var(--gray-100);
+}
+
+.nav-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.section {
+    display: none;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    font-size: 0.9rem;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--gray-300);
+    border-radius: calc(var(--radius) - 0.125rem);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: calc(var(--radius) - 0.125rem);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-300);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success { background: #dcfce7; color: #166534; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-danger { background: #fee2e2; color: #991b1b; }
+.badge-info { background: #dbeafe; color: #1e40af; }
+
+.table-container {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: var(--gray-50);
+}
+
+th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+tr:hover {
+    background: var(--gray-50);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-label {
+    color: var(--gray-500);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.alert {
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border-left: 4px solid var(--success);
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid var(--danger);
+}
+
+.alert-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border-left: 4px solid var(--primary);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius);
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.ata-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--secondary);
+}
+
+.ata-section h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.dynamic-list {
+    border: 1px solid var(--gray-200);
+    border-radius: calc(var(--radius) - 0.125rem);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.dynamic-item {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    align-items: start;
+}
+
+.dynamic-item input {
+    flex: 1;
+}
+
+.flow-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.flow-item {
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 1rem;
+    position: relative;
+    box-shadow: var(--shadow);
+}
+
+.flow-item::after {
+    content: '↓';
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.flow-item:last-child::after {
+    display: none;
+}
+
+.print-only {
+    display: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--gray-500);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.progress-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.progress-overlay.active {
+    display: flex;
+}
+
+.progress-bar {
+    width: 300px;
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+
+.group-header {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.group-header:hover {
+    opacity: 0.9;
+}
+
+.grupo-tarefas {
+    transition: all 0.3s ease;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+@media print {
+    body { background: white; }
+    nav, header, .no-print, .btn, .modal-header button,
+    #planos-acao, #atas-salvas, #dashboard, #nova-ata,
+    #fluxograma, #gestao-demandas, #base-conhecimento,
+    #campos-custom, #configuracoes, #alertContainer {
+        display: none !important;
+    }
+    .card { box-shadow: none; page-break-inside: avoid; }
+    .print-only { display: block; }
+    .modal {
+        position: static !important;
+        display: block !important;
+        background: none !important;
+        padding: 0 !important;
+    }
+    .modal-content {
+        max-height: none !important;
+        overflow-y: visible !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+    }
+    #modalCampo, #modalPlanoAcao, #modalEditarPlano, #modalDemanda, #modalArtigo {
+        display: none !important;
+    }
+    .modal-body { padding: 0 !important; }
+    #visualizarContent { padding: 0 !important; }
+    #visualizarContent > div { padding: 0 !important; }
+}
+
+@media (max-width: 768px) {
+    header { flex-direction: column; align-items: stretch; }
+    .form-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .header-actions { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Overlay -->
+<div class="progress-overlay" id="progressOverlay">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <p id="progressText" style="color: var(--gray-700);">Sincronizando...</p>
+</div>
+
+<div class="container">
+    <header class="no-print">
+        <h1>⚕️ CIPA Manager</h1>
+        <div class="header-actions">
+            <span class="sync-status" id="syncStatus">💾 Local</span>
+            <button class="btn btn-success btn-sm" onclick="syncToCloud()" id="btnSync">📤 Sincronizar Nuvem</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportData()">📥 Exportar Backup</button>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importFile').click()">📤 Importar Backup</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+    </header>
+
+    <nav class="no-print">
+        <button class="nav-btn active" onclick="showSection('dashboard', event)">📊 Dashboard</button>
+        <button class="nav-btn" onclick="showSection('nova-ata', event)">➕ Nova Ata</button>
+        <button class="nav-btn" onclick="showSection('atas-salvas', event)">📋 Atas Salvas</button>
+        <button class="nav-btn" onclick="showSection('planos-acao', event)">✓ Planos de Ação</button>
+        <button class="nav-btn" onclick="showSection('fluxograma', event)">📈 Fluxograma</button>
+        <button class="nav-btn" onclick="showSection('gestao-demandas', event)">📝 Gestão de Demandas</button>
+        <button class="nav-btn" onclick="showSection('base-conhecimento', event)">📚 Base de Conhecimento</button>
+        <button class="nav-btn" onclick="showSection('campos-custom', event)">⚙️ Campos Personalizados</button>
+        <button class="nav-btn" onclick="showSection('configuracoes', event)">🔧 Configurações</button>
+    </nav>
+
+    <div id="alertContainer"></div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="section active">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="statAtas">0</div>
+                <div class="stat-label">Total de Atas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statAcoes">0</div>
+                <div class="stat-label">Planos de Ação Abertos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statAcidentes">0</div>
+                <div class="stat-label">Acidentes Registrados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statMes">0</div>
+                <div class="stat-label">Atas este Mês</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
+                <div class="stat-value" id="statDemandasTotal">0</div>
+                <div class="stat-label">Total de Demandas</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                <div class="stat-value" id="statDemandasPendentes">0</div>
+                <div class="stat-label">Demandas Pendentes</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+                <div class="stat-value" id="statDemandasAndamento">0</div>
+                <div class="stat-label">Demandas em Andamento</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #16a34a;">
+                <div class="stat-value" id="statDemandasConcluidas">0</div>
+                <div class="stat-label">Demandas Concluídas</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📋 Últimas Atas</h2>
+            </div>
+            <div id="dashboardAtasList"></div>
+        </div>
+    </div>
+
+    <!-- NOVA ATA -->
+    <div id="nova-ata" class="section">
+        <form id="formAta" onsubmit="return false;">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">➕ Nova Ata de Reunião CIPA</h2>
+                    <div>
+                        <button type="button" class="btn btn-secondary" onclick="limparFormulario()">🗑️ Limpar</button>
+                        <button type="button" class="btn btn-success" onclick="salvarAta()">💾 Salvar Ata</button>
+                        <button type="button" class="btn btn-warning btn-sm" id="btnCancelarEdicao" style="display:none;" onclick="cancelarEdicaoAta()">🚫 Cancelar Edição</button>
+                    </div>
+                </div>
+
+                <input type="hidden" id="ataId" value="">
+
+                <!-- SEÇÃO 1: Abertura da Reunião -->
+                <div class="ata-section">
+                    <h3>Seção 1 - Abertura da Reunião</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data da Reunião *</label>
+                            <input type="date" id="dataReuniao" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Horário de Início *</label>
+                            <input type="time" id="horaInicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Horário de Término</label>
+                            <input type="time" id="horaTermino">
+                        </div>
+                        <div class="form-group">
+                            <label>Local *</label>
+                            <input type="text" id="local" required>
+                        </div>
+                    </div>
+                    <div id="custom-fields-sec1"></div>
+                </div>
+
+                <!-- SEÇÃO 2: Membros da CIPA -->
+                <div class="ata-section">
+                    <h3>Seção 2 - Presenças</h3>
+                    <div id="membrosPresentesList"></div>
+                    <div id="custom-fields-sec2"></div>
+                </div>
+
+                <!-- SEÇÃO 3: Convidados -->
+                <div class="ata-section">
+                    <h3>Seção 3 - Convidados</h3>
+                    <div id="convidadosList" class="dynamic-list"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarConvidado()">+ Adicionar Convidado</button>
+                    <div id="custom-fields-sec3"></div>
+                </div>
+
+                <!-- SEÇÃO 4: Acidentes e Investigações -->
+                <div class="ata-section">
+                    <h3>Seção 4 - Acidentes de Trabalho</h3>
+                    <div id="acidentesContainer"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarAcidente()">+ Adicionar Acidente</button>
+                    <div id="custom-fields-sec4"></div>
+                </div>
+
+                <!-- SEÇÃO 5: Pauta e Demandas -->
+                <div class="ata-section">
+                    <h3>Seção 5 - Pauta da Reunião</h3>
+                    <div class="form-group">
+                        <label>Tema 1 - Leitura da Ata Anterior</label>
+                        <textarea id="tema1" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tema 2 - Ações da Reunião Anterior</label>
+                        <textarea id="tema2" rows="3"></textarea>
+                    </div>
+                    <div id="temasExtras"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarTema()">+ Adicionar Tema</button>
+                    
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 1rem;">Demandas por Setor</h4>
+                    <div id="demandasSetores"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarDemanda()">+ Adicionar Demanda</button>
+                    <div id="custom-fields-sec5"></div>
+                </div>
+
+                <!-- SEÇÃO 6: Plano de Ações -->
+                <div class="ata-section">
+                    <h3>Seção 6 - Plano de Ações Definidas</h3>
+                    <div id="acoesContainer">
+                        <div class="table-container">
+                            <table id="tabelaAcoes">
+                                <thead>
+                                    <tr>
+                                        <th>Ação</th>
+                                        <th>Responsável</th>
+                                        <th>Prazo</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarAcao()" style="margin-top: 0.5rem;">+ Adicionar Ação</button>
+                    <div id="custom-fields-sec6"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Observações Gerais</label>
+                    <textarea id="observacoes" rows="4"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ATAS SALVAS -->
+    <div id="atas-salvas" class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📋 Atas Salvas</h2>
+                <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Imprimir Lista</button>
+            </div>
+            <div id="atasSalvasList"></div>
+        </div>
+    </div>
+
+    <!-- PLANOS DE AÇÃO -->
+    <div id="planos-acao" class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">✓ Planos de Ação</h2>
+                <button class="btn btn-primary btn-sm" onclick="criarPlanoManual()">+ Criar Manual</button>
+            </div>
+            <div id="planosAcaoList"></div>
+        </div>
+    </div>
+
+    <!-- FLUXOGRAMA -->
+    <div id="fluxograma" class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📈 Gestão de Tarefas - Fluxograma</h2>
+                <select id="fluxogramaAta" onchange="carregarFluxograma()" style="width: auto;">
+                    <option value="">Todas as ATAs</option>
+                </select>
+            </div>
+            <div id="fluxogramaContainer"></div>
+            <button class="btn btn-primary" onclick="adicionarTarefaFluxo()">+ Adicionar Tarefa</button>
+        </div>
+    </div>
+
+    <!-- GESTÃO DE DEMANDAS -->
+    <div id="gestao-demandas" class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📝 Gestão de Demandas</h2>
+                <button class="btn btn-primary" onclick="abrirNovaDemanda()">+ Nova Demanda</button>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <div class="form-group" style="min-width: 150px;">
+                    <label>Filtrar por Setor</label>
+                    <select id="filtroSetor" onchange="filtrarDemandas()">
+                        <option value="">Todos os Setores</option>
+                    </select>
+                </div>
+                <div class="form-group" style="min-width: 150px;">
+                    <label>Filtrar por Status</label>
+                    <select id="filtroStatus" onchange="filtrarDemandas()">
+                        <option value="">Todos os Status</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Em andamento">Em andamento</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Indeferido">Indeferido</option>
+                    </select>
+                </div>
+                <div class="form-group" style="min-width: 150px;">
+                    <label>Filtrar por Prioridade</label>
+                    <select id="filtroPrioridade" onchange="filtrarDemandas()">
+                        <option value="">Todas as Prioridades</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Média">Média</option>
+                        <option value="Baixa">Baixa</option>
+                    </select>
+                </div>
+            </div>
+            <div id="listaDemandas"></div>
+        </div>
+    </div>
+
+    <!-- BASE DE CONHECIMENTO -->
+    <div id="base-conhecimento" class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📚 Base de Conhecimento</h2>
+                <button class="btn btn-primary" onclick="abrirNovoArtigo()">+ Novo Artigo</button>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <div class="form-group" style="min-width: 200px;">
+                    <label>🔍 Buscar por Título</label>
+                    <input type="text" id="buscaConhecimento" onkeyup="filtrarArtigos()" placeholder="Digite para buscar...">
+                </div>
+                <div class="form-group" style="min-width: 150px;">
+                    <label>Filtrar por Categoria</label>
+                    <select id="filtroCategoria" onchange="filtrarArtigos()">
+                        <option value="">Todas as Categorias</option>
+                        <option value="Dúvida CIPA">Dúvida CIPA</option>
+                        <option value="Legislação">Legislação</option>
+                        <option value="Procedimento">Procedimento</option>
+                        <option value="Segurança">Segurança</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Normas">Normas</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="form-group" style="min-width: 150px;">
+                    <label>Filtrar por Status</label>
+                    <select id="filtroStatusConhecimento" onchange="filtrarArtigos()">
+                        <option value="">Todos os Status</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Revisão Pendente">Revisão Pendente</option>
+                        <option value="Arquivado">Arquivado</option>
+                    </select>
+                </div>
+            </div>
+            <div id="listaArtigos"></div>
+        </div>
+    </div>
+
+    <!-- CAMPOS PERSONALIZADOS -->
+    <div id="campos-custom" class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">⚙️ Campos Personalizados</h2>
+                <button class="btn btn-primary btn-sm" onclick="abrirModalCampo()">+ Novo Campo</button>
+            </div>
+            <div id="camposCustomList"></div>
+        </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div id="configuracoes" class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">🔧 Configurações</h2>
+                <button class="btn btn-success" onclick="salvarConfig()">💾 Salvar Configurações</button>
+            </div>
+            
+            <h3 style="margin-bottom: 1rem;">Dados da Unidade</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome da Unidade</label>
+                    <input type="text" id="configUnidade">
+                </div>
+                <div class="form-group">
+                    <label>CNPJ</label>
+                    <input type="text" id="configCnpj">
+                </div>
+                <div class="form-group">
+                    <label>Endereço</label>
+                    <input type="text" id="configEndereco">
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem;">Membros da CIPA</h3>
+            <div id="configMembros"></div>
+            <button class="btn btn-secondary btn-sm" onclick="adicionarMembro()">+ Adicionar Membro</button>
+
+            <h3 style="margin: 2rem 0 1rem;">Convidados Frequentes</h3>
+            <div id="configConvidados"></div>
+            <button class="btn btn-secondary btn-sm" onclick="adicionarConvidadoConfig()">+ Adicionar Convidado</button>
+
+            <h3 style="margin: 2rem 0 1rem;">Setores</h3>
+            <div id="configSetores"></div>
+            <button class="btn btn-secondary btn-sm" onclick="adicionarSetor()">+ Adicionar Setor</button>
+
+            <h3 style="margin: 2rem 0 1rem;">🔒 Segurança e Senha</h3>
+            <div class="form-row">
+                <div class="form-group" id="configSenhaContainer">
+                    <!-- Preenchido dinamicamente pelo loadConfig() -->
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem;">☁️ Sincronização com Google Sheets</h3>
+            <div id="configSyncSection">
+                <!-- Preenchido dinamicamente pelo loadConfig() -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Visualizar ATA -->
+<div id="modalVisualizar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Visualizar ATA</h2>
+            <button class="btn btn-secondary btn-sm" onclick="fecharModal('modalVisualizar')">✕</button>
+        </div>
+        <div class="modal-body" id="visualizarContent"></div>
+        <div class="modal-header no-print">
+            <button class="btn btn-primary" onclick="imprimirAta()">🖨️ Imprimir</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="modalPlanoAcao" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Gerar Plano de Ação para Acidente</h2>
+            <button class="btn btn-secondary btn-sm" onclick="fecharModal('modalPlanoAcao')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="planoAcaoAcidenteId">
+            <div id="planoAcaoDadosAcidente" style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem;"></div>
+            <div class="form-group">
+                <label>Tipo de Ação *</label>
+                <select id="planoAcaoTipo">
+                    <option value="Corretiva">Ação Corretiva</option>
+                    <option value="Preventiva">Ação Preventiva</option>
+                    <option value="Investigação">Investigação</option>
+                    <option value="Treinamento">Treinamento</option>
+                    <option value="Outro">Outro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descrição da Ação *</label>
+                <textarea id="planoAcaoDescricao" rows="4" placeholder="Descreva detalhadamente a ação a ser tomada..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Responsável *</label>
+                    <input type="text" id="planoAcaoResponsavel" placeholder="Nome do responsável">
+                </div>
+                <div class="form-group">
+                    <label>Prazo *</label>
+                    <input type="date" id="planoAcaoPrazo">
+                </div>
+                <div class="form-group">
+                    <label>Prioridade</label>
+                    <select id="planoAcaoPrioridade">
+                        <option value="Alta">Alta</option>
+                        <option value="Média" selected>Média</option>
+                        <option value="Baixa">Baixa</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Recursos Necessários</label>
+                <textarea id="planoAcaoRecursos" rows="2" placeholder="Equipamentos, materiais, pessoas necessárias..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Indicador de Eficácia</label>
+                <input type="text" id="planoAcaoIndicador" placeholder="Como medir o sucesso da ação?">
+            </div>
+            <button class="btn btn-success" onclick="salvarPlanoAcao()">💾 Salvar Plano de Ação</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalEditarPlano" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalEditarPlanoTitulo">Editar Plano de Ação</h2>
+            <button class="btn btn-secondary btn-sm" onclick="fecharModal('modalEditarPlano')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editarPlanoId">
+            <div class="form-group">
+                <label>Tipo de Ação *</label>
+                <select id="editarPlanoTipo">
+                    <option value="Corretiva">Ação Corretiva</option>
+                    <option value="Preventiva">Ação Preventiva</option>
+                    <option value="Investigação">Investigação</option>
+                    <option value="Treinamento">Treinamento</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Outro">Outro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descrição da Ação *</label>
+                <textarea id="editarPlanoDescricao" rows="4" placeholder="Descreva detalhadamente a ação..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Responsável *</label>
+                    <input type="text" id="editarPlanoResponsavel" placeholder="Nome do responsável">
+                </div>
+                <div class="form-group">
+                    <label>Prazo *</label>
+                    <input type="date" id="editarPlanoPrazo">
+                </div>
+                <div class="form-group">
+                    <label>Prioridade</label>
+                    <select id="editarPlanoPrioridade">
+                        <option value="Alta">Alta</option>
+                        <option value="Média" selected>Média</option>
+                        <option value="Baixa">Baixa</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="editarPlanoStatus">
+                    <option value="Pendente">Pendente</option>
+                    <option value="Em andamento">Em andamento</option>
+                    <option value="Concluída">Concluída</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Recursos Necessários</label>
+                <textarea id="editarPlanoRecursos" rows="2" placeholder="Equipamentos, materiais, pessoas necessárias..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Indicador de Eficácia</label>
+                <input type="text" id="editarPlanoIndicador" placeholder="Como medir o sucesso da ação?">
+            </div>
+            <div id="editarPlanoDadosAcidente" style="background: #fee2e2; padding: 1rem; border-radius: var(--radius); margin: 1rem 0; display: none;">
+                <h4 style="color: #991b1b; margin-bottom: 0.5rem;">🚨 Dados do Acidente Vinculado</h4>
+                <div id="editarPlanoDadosAcidenteContent"></div>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="fecharModal('modalEditarPlano')">Cancelar</button>
+                <button class="btn btn-success" onclick="salvarEdicaoPlano()">💾 Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalDemanda" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalDemandaTitulo">Nova Demanda</h2>
+            <button class="btn btn-secondary btn-sm" onclick="fecharModalDemanda()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="demandaId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Setor *</label>
+                    <select id="demandaSetor" required>
+                        <option value="">Selecione o Setor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Prioridade *</label>
+                    <select id="demandaPrioridade" required>
+                        <option value="Baixa">Baixa</option>
+                        <option value="Média" selected>Média</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select id="demandaStatus" required>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Em andamento">Em andamento</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Indeferido">Indeferido</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descrição da Demanda *</label>
+                <textarea id="demandaDescricao" rows="4" placeholder="Descreva detalhadamente a demanda..." required></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Origem (Motivo da Demanda) *</label>
+                    <select id="demandaOrigem" required>
+                        <option value="">Selecione a Origem</option>
+                        <option value="Reunião CIPA">Reunião CIPA</option>
+                        <option value="Inspeção de Segurança">Inspeção de Segurança</option>
+                        <option value="Solicitação de Funcionário">Solicitação de Funcionário</option>
+                        <option value="Acidente de Trabalho">Acidente de Trabalho</option>
+                        <option value="Auditoria">Auditoria</option>
+                        <option value="Norma Regulamentadora">Norma Regulamentadora</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="form-group" id="grupoOutraOrigem" style="display: none;">
+                    <label>Especifique a Origem</label>
+                    <input type="text" id="demandaOutraOrigem" placeholder="Descreva a origem...">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Solicitante *</label>
+                    <input type="text" id="demandaSolicitante" placeholder="Nome da pessoa que gerou a demanda" required>
+                </div>
+                <div class="form-group">
+                    <label>Responsável</label>
+                    <input type="text" id="demandaResponsavel" placeholder="Nome do responsável pela demanda">
+                </div>
+                <div class="form-group">
+                    <label>Prazo de Entrega *</label>
+                    <input type="date" id="demandaPrazo" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Conclusão da Demanda</label>
+                <textarea id="demandaConclusao" rows="3" placeholder="Descreva a conclusão ou resultado da demanda..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Observações Adicionais</label>
+                <textarea id="demandaObservacoes" rows="2" placeholder="Outras informações relevantes..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="fecharModalDemanda()">Cancelar</button>
+                <button class="btn btn-success" onclick="salvarDemanda()">💾 Salvar Demanda</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalArtigo" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalArtigoTitulo">Novo Artigo</h2>
+            <button class="btn btn-secondary btn-sm" onclick="fecharModal('modalArtigo')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="artigoId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Categoria *</label>
+                    <select id="artigoCategoria" required>
+                        <option value="">Selecione a Categoria</option>
+                        <option value="Dúvida CIPA">Dúvida CIPA</option>
+                        <option value="Legislação">Legislação</option>
+                        <option value="Procedimento">Procedimento</option>
+                        <option value="Segurança">Segurança</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Normas">Normas</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select id="artigoStatus" required>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Revisão Pendente">Revisão Pendente</option>
+                        <option value="Arquivado">Arquivado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Título *</label>
+                <input type="text" id="artigoTitulo" placeholder="Título do artigo (visível na listagem)" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Quem trouxe a pauta</label>
+                    <input type="text" id="artigoOrigem" placeholder="Nome da pessoa que trouxe o tema">
+                </div>
+                <div class="form-group">
+                    <label>Data do registro</label>
+                    <input type="date" id="artigoData">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Pergunta / Dúvida Original *</label>
+                <textarea id="artigoPergunta" rows="3" placeholder="Qual foi a dúvida ou questionamento original?" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Análise / Parecer da CIPA</label>
+                <textarea id="artigoAnalise" rows="4" placeholder="Análise realizada pela CIPA sobre o tema..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Resposta / Esclarecimento *</label>
+                <textarea id="artigoResposta" rows="4" placeholder="Resposta ou esclarecimento dado..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Fundamentação Legal (se aplicável)</label>
+                <textarea id="artigoFundamentacao" rows="2" placeholder="Leis, normas ou regulamentos relacionados..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Palavras-chave (separadas por vírgula)</label>
+                <input type="text" id="artigoTags" placeholder="Ex: NR-5, eleição, estabilidade">
+            </div>
+            <div class="form-group">
+                <label>Observações Internas</label>
+                <textarea id="artigoObservacoes" rows="2" placeholder="Notas internas da CIPA..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="fecharModal('modalArtigo')">Cancelar</button>
+                <button class="btn btn-success" onclick="salvarArtigo()">💾 Salvar Artigo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalCampo" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Novo Campo Personalizado</h2>
+            <button class="btn btn-secondary btn-sm" onclick="fecharModal('modalCampo')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="campoId">
+            <div class="form-group">
+                <label>Nome do Campo *</label>
+                <input type="text" id="campoNome" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo *</label>
+                    <select id="campoTipo" onchange="toggleOpcoesCampo()">
+                        <option value="texto">Texto</option>
+                        <option value="numero">Número</option>
+                        <option value="data">Data</option>
+                        <option value="textarea">Área de Texto</option>
+                        <option value="dropdown">Lista Suspensa</option>
+                        <option value="checkbox">Checkbox</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Seção da Ata *</label>
+                    <select id="campoSecao">
+                        <option value="1">Seção 1 - Abertura</option>
+                        <option value="2">Seção 2 - Presenças</option>
+                        <option value="3">Seção 3 - Convidados</option>
+                        <option value="4">Seção 4 - Acidentes</option>
+                        <option value="5">Seção 5 - Pauta</option>
+                        <option value="6">Seção 6 - Ações</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" id="campoOpcoesGroup" style="display:none">
+                <label>Opções (uma por linha) *</label>
+                <textarea id="campoOpcoes" rows="4" placeholder="Opção 1&#10;Opção 2&#10;Opção 3"></textarea>
+            </div>
+            <button class="btn btn-success" onclick="salvarCampoCustom()">💾 Salvar Campo</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== CONFIGURAÇÃO FIXA =====
+const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbw-_b9zaNoQLblv0iivgKc8zCZyGm_dsgLoAKJjCAfSP-wD1x-YeeAtbvLbx6PBJsokHw/exec';
+const USAR_GOOGLE_SHEETS = true;
+
+let CONFIG = {
+    googleApiUrl: GOOGLE_API_URL,
+    senhaBloqueio: 'CIPA@SantoAndre',
+    usarGoogleSheets: USAR_GOOGLE_SHEETS
+};
+
+// ===== GERENCIAMENTO DE SINCRONIZAÇÃO =====
+let syncInProgress = false;
+let syncQueue = [];
+
+function updateSyncStatus(status, text) {
+    const el = document.getElementById('syncStatus');
+    el.className = 'sync-status ' + status;
+    el.textContent = text;
+}
+
+function showProgress(show, text = '') {
+    const overlay = document.getElementById('progressOverlay');
+    if (show) {
+        overlay.classList.add('active');
+        document.getElementById('progressText').textContent = text;
+        document.getElementById('progressFill').style.width = '0%';
+    } else {
+        overlay.classList.remove('active');
+    }
+}
+
+function updateProgress(percent) {
+    document.getElementById('progressFill').style.width = percent + '%';
+}
+
+// ===== STORAGE MANAGEMENT =====
+const STORAGE_KEYS = {
+    CONFIG: 'cipa_config',
+    ATAS: 'cipa_atas',
+    ACOES: 'cipa_acoes',
+    FLUXOGRAMAS: 'cipa_fluxogramas',
+    CAMPOS_CUSTOM: 'cipa_campos_custom',
+    DEMANDAS: 'cipa_demandas',
+    BASE_CONHECIMENTO: 'cipa_base_conhecimento'
+};
+
+function storageGet(key) {
+    try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+    } catch (e) {
+        console.error('Erro ao ler localStorage:', e);
+        return null;
+    }
+}
+
+function storageSet(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+    } catch (e) {
+        console.error('Erro ao salvar no localStorage:', e);
+        showAlert('Erro ao salvar dados: ' + e.message, 'error');
+        return false;
+    }
+}
+
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+// ===== FUNÇÕES DE SINCRONIZAÇÃO COM GOOGLE SHEETS =====
+async function googleSheetsGet(aba, id) {
+    if (!CONFIG.usarGoogleSheets || !CONFIG.googleApiUrl) return null;
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        
+        const url = `${CONFIG.googleApiUrl}?acao=carregar&aba=${aba}&id=${encodeURIComponent(id)}`;
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        const result = await response.json();
+        if (result.status === 'sucesso' && result.dados) {
+            return JSON.parse(result.dados);
+        }
+        return null;
+    } catch (e) {
+        console.error('Erro ao carregar do Google Sheets:', e);
+        return null;
+    }
+}
+
+async function googleSheetsGetAll(aba) {
+    if (!CONFIG.usarGoogleSheets || !CONFIG.googleApiUrl) return [];
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        
+        const url = `${CONFIG.googleApiUrl}?acao=carregarTudo&aba=${aba}`;
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        const result = await response.json();
+        if (result.status === 'sucesso' && result.dados) {
+            return result.dados.map(item => {
+                try {
+                    return JSON.parse(item.dados);
+                } catch (e) {
+                    return null;
+                }
+            }).filter(item => item !== null);
+        }
+        return [];
+    } catch (e) {
+        console.error('Erro ao carregar todos do Google Sheets:', e);
+        return [];
+    }
+}
+
+async function googleSheetsSet(aba, id, dados) {
+    if (!CONFIG.usarGoogleSheets || !CONFIG.googleApiUrl) return false;
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        
+        const dadosStr = JSON.stringify(dados);
+        const url = `${CONFIG.googleApiUrl}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `acao=salvar&aba=${encodeURIComponent(aba)}&id=${encodeURIComponent(id)}&dados=${encodeURIComponent(dadosStr)}`
+        });
+        
+        clearTimeout(timeoutId);
+        
+        const result = await response.json();
+        return result.status === 'sucesso';
+    } catch (e) {
+        console.error('Erro ao salvar no Google Sheets:', e);
+        return false;
+    }
+}
+
+async function googleSheetsDelete(aba, id) {
+    if (!CONFIG.usarGoogleSheets || !CONFIG.googleApiUrl) return false;
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const url = `${CONFIG.googleApiUrl}?acao=excluir&aba=${aba}&id=${encodeURIComponent(id)}`;
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        const result = await response.json();
+        return result.status === 'sucesso';
+    } catch (e) {
+        console.error('Erro ao excluir do Google Sheets:', e);
+        return false;
+    }
+}
+
+// ===== SINCRONIZAÇÃO COMPLETA =====
+async function syncToCloud() {
+    if (syncInProgress) {
+        showAlert('Sincronização já em andamento...', 'info');
+        return;
+    }
+    
+    if (!CONFIG.usarGoogleSheets || !CONFIG.googleApiUrl) {
+        showAlert('Configure a URL do Google Sheets nas Configurações primeiro', 'info');
+        return;
+    }
+    
+    syncInProgress = true;
+    updateSyncStatus('syncing', '⏳ Sincronizando...');
+    showProgress(true, 'Enviando dados para a nuvem...');
+    
+    try {
+        let enviados = 0;
+        let erros = 0;
+        let total = 0;
+        
+        // Contar total de itens
+        const atasLocais = storageGet(STORAGE_KEYS.ATAS) || [];
+        const acoesLocais = storageGet(STORAGE_KEYS.ACOES) || [];
+        const demandasLocais = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+        const baseLocal = storageGet(STORAGE_KEYS.BASE_CONHECIMENTO) || [];
+        const fluxosLocal = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+        
+        total = 1 + atasLocais.length + acoesLocais.length + demandasLocais.length + 
+                baseLocal.length + Object.keys(fluxosLocal).length + 1;
+        
+        let progresso = 0;
+        
+        // Config
+        const configLocal = storageGet(STORAGE_KEYS.CONFIG);
+        if (configLocal) {
+            const ok = await googleSheetsSet('config', 'principal', configLocal);
+            ok ? enviados++ : erros++;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Atas
+        for (const ata of atasLocais) {
+            const ok = await googleSheetsSet('atas', ata.id, ata);
+            ok ? enviados++ : erros++;
+            progresso++;
+            updateProgress(Math.round((progresso / total) * 100));
+        }
+        
+        // Ações
+        for (const acao of acoesLocais) {
+            const ok = await googleSheetsSet('acoes', acao.id, acao);
+            ok ? enviados++ : erros++;
+            progresso++;
+            updateProgress(Math.round((progresso / total) * 100));
+        }
+        
+        // Demandas
+        for (const demanda of demandasLocais) {
+            const ok = await googleSheetsSet('demandas', demanda.id, demanda);
+            ok ? enviados++ : erros++;
+            progresso++;
+            updateProgress(Math.round((progresso / total) * 100));
+        }
+        
+        // Base de Conhecimento
+        for (const artigo of baseLocal) {
+            const ok = await googleSheetsSet('base_conhecimento', artigo.id, artigo);
+            ok ? enviados++ : erros++;
+            progresso++;
+            updateProgress(Math.round((progresso / total) * 100));
+        }
+        
+        // Campos Custom
+        const camposLocal = storageGet(STORAGE_KEYS.CAMPOS_CUSTOM);
+        if (camposLocal) {
+            const ok = await googleSheetsSet('campos_custom', 'todos', camposLocal);
+            ok ? enviados++ : erros++;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Fluxogramas (apenas os que têm tarefas)
+        for (const [ataId, tarefas] of Object.entries(fluxosLocal)) {
+            // PULAR fluxogramas vazios
+            if (!tarefas || tarefas.length === 0) continue;
+            
+            const ok = await googleSheetsSet('fluxogramas', ataId, tarefas);
+            ok ? enviados++ : erros++;
+            progresso++;
+            updateProgress(Math.round((progresso / total) * 100));
+        }
+        
+        updateProgress(100);
+        
+        if (erros === 0) {
+            showAlert(`✅ ${enviados} itens sincronizados com sucesso!`, 'success');
+            updateSyncStatus('synced', '☁️ Sincronizado');
+        } else {
+            showAlert(`⚠️ ${enviados} enviados, ${erros} erros`, 'info');
+            updateSyncStatus('error', '⚠️ Erro parcial');
+        }
+        
+    } catch (e) {
+        console.error('Erro ao sincronizar:', e);
+        showAlert('❌ Erro ao sincronizar com a nuvem', 'error');
+        updateSyncStatus('error', '❌ Erro');
+    } finally {
+        syncInProgress = false;
+        showProgress(false);
+    }
+}
+
+async function downloadFromCloud() {
+    if (syncInProgress) {
+        showAlert('Operação em andamento...', 'info');
+        return;
+    }
+    
+    if (!CONFIG.usarGoogleSheets || !CONFIG.googleApiUrl) {
+        showAlert('Configure a URL do Google Sheets nas Configurações primeiro', 'info');
+        return;
+    }
+    
+    if (!confirm('Baixar dados da nuvem? Os dados locais serão substituídos pelos da nuvem.')) return;
+    
+    syncInProgress = true;
+    updateSyncStatus('syncing', '⏳ Baixando...');
+    showProgress(true, 'Baixando dados da nuvem...');
+    
+    // LIMPAR dados locais para evitar itens excluídos
+    storageSet(STORAGE_KEYS.ATAS, []);
+    storageSet(STORAGE_KEYS.ACOES, []);
+    storageSet(STORAGE_KEYS.DEMANDAS, []);
+    storageSet(STORAGE_KEYS.BASE_CONHECIMENTO, []);
+    storageSet(STORAGE_KEYS.FLUXOGRAMAS, {});
+    
+    try {
+        let baixados = 0;
+        let total = 7;
+        let progresso = 0;
+        
+        // Config
+        const configNuvem = await googleSheetsGet('config', 'principal');
+        if (configNuvem) {
+            const configLocal = storageGet(STORAGE_KEYS.CONFIG) || {};
+            storageSet(STORAGE_KEYS.CONFIG, { ...configLocal, ...configNuvem });
+            baixados++;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Atas (merge)
+        const atasNuvem = await googleSheetsGetAll('atas');
+        if (atasNuvem && atasNuvem.length > 0) {
+            const atasLocais = storageGet(STORAGE_KEYS.ATAS) || [];
+            const atasMap = new Map();
+            atasLocais.forEach(a => atasMap.set(a.id, a));
+            atasNuvem.forEach(a => {
+                if (!atasMap.has(a.id) || (a.dataAtualizacao > atasMap.get(a.id).dataAtualizacao)) {
+                    atasMap.set(a.id, a);
+                }
+            });
+            storageSet(STORAGE_KEYS.ATAS, Array.from(atasMap.values()));
+            baixados += atasNuvem.length;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Ações (merge)
+        const acoesNuvem = await googleSheetsGetAll('acoes');
+        if (acoesNuvem && acoesNuvem.length > 0) {
+            const acoesLocais = storageGet(STORAGE_KEYS.ACOES) || [];
+            const acoesMap = new Map();
+            acoesLocais.forEach(a => acoesMap.set(a.id, a));
+            acoesNuvem.forEach(a => {
+                if (!acoesMap.has(a.id) || (a.dataAtualizacao > acoesMap.get(a.id).dataAtualizacao)) {
+                    acoesMap.set(a.id, a);
+                }
+            });
+            storageSet(STORAGE_KEYS.ACOES, Array.from(acoesMap.values()));
+            baixados += acoesNuvem.length;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Demandas (merge)
+        const demandasNuvem = await googleSheetsGetAll('demandas');
+        if (demandasNuvem && demandasNuvem.length > 0) {
+            const demandasLocais = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+            const demandasMap = new Map();
+            demandasLocais.forEach(d => demandasMap.set(d.id, d));
+            demandasNuvem.forEach(d => {
+                if (!demandasMap.has(d.id) || (d.dataAtualizacao > demandasMap.get(d.id).dataAtualizacao)) {
+                    demandasMap.set(d.id, d);
+                }
+            });
+            storageSet(STORAGE_KEYS.DEMANDAS, Array.from(demandasMap.values()));
+            baixados += demandasNuvem.length;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Base de Conhecimento (merge)
+        const baseNuvem = await googleSheetsGetAll('base_conhecimento');
+        if (baseNuvem && baseNuvem.length > 0) {
+            const baseLocal = storageGet(STORAGE_KEYS.BASE_CONHECIMENTO) || [];
+            const baseMap = new Map();
+            baseLocal.forEach(b => baseMap.set(b.id, b));
+            baseNuvem.forEach(b => {
+                if (!baseMap.has(b.id) || (b.dataAtualizacao > baseMap.get(b.id).dataAtualizacao)) {
+                    baseMap.set(b.id, b);
+                }
+            });
+            storageSet(STORAGE_KEYS.BASE_CONHECIMENTO, Array.from(baseMap.values()));
+            baixados += baseNuvem.length;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Campos Custom
+        const camposNuvem = await googleSheetsGet('campos_custom', 'todos');
+        if (camposNuvem) {
+            storageSet(STORAGE_KEYS.CAMPOS_CUSTOM, camposNuvem);
+            baixados++;
+        }
+        progresso++;
+        updateProgress(Math.round((progresso / total) * 100));
+        
+        // Fluxogramas (merge)
+        const fluxosNuvem = await googleSheetsGetAll('fluxogramas');
+        if (fluxosNuvem && fluxosNuvem.length > 0) {
+            const fluxosLocal = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+            fluxosNuvem.forEach(f => {
+                if (f && f.length > 0) {
+                    const ataId = f[0].ataId;
+                    if (ataId) fluxosLocal[ataId] = f;
+                }
+            });
+            storageSet(STORAGE_KEYS.FLUXOGRAMAS, fluxosLocal);
+            baixados++;
+        }
+        progresso++;
+        updateProgress(100);
+        
+        loadConfig();
+        loadDashboard();
+        loadAtasSalvas();
+        loadPlanosAcao();
+        carregarListaDemandas();
+        
+        showAlert(`✅ ${baixados} itens baixados da nuvem!`, 'success');
+        updateSyncStatus('synced', '☁️ Sincronizado');
+        
+    } catch (e) {
+        console.error('Erro ao baixar:', e);
+        showAlert('❌ Erro ao baixar da nuvem', 'error');
+        updateSyncStatus('error', '❌ Erro');
+    } finally {
+        syncInProgress = false;
+        showProgress(false);
+    }
+}
+
+// ===== UI HELPERS =====
+function showSection(sectionId, event) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    
+    const buttons = document.querySelectorAll('.nav-btn');
+    buttons.forEach(btn => {
+        if (btn.textContent.includes(getSectionName(sectionId))) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Preservar scroll
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    if (sectionId === 'dashboard') loadDashboard();
+    if (sectionId === 'atas-salvas') loadAtasSalvas();
+    if (sectionId === 'planos-acao') loadPlanosAcao();
+    if (sectionId === 'fluxograma') initFluxograma();
+    if (sectionId === 'gestao-demandas') carregarGestaoDemandas();
+    if (sectionId === 'base-conhecimento') carregarBaseConhecimento();
+    if (sectionId === 'campos-custom') loadCamposCustom();
+    if (sectionId === 'nova-ata') renderCustomFields();
+}
+
+function getSectionName(sectionId) {
+    const names = {
+        'dashboard': 'Dashboard',
+        'nova-ata': 'Nova Ata',
+        'atas-salvas': 'Atas Salvas',
+        'planos-acao': 'Planos de Ação',
+        'fluxograma': 'Fluxograma',
+        'gestao-demandas': 'Gestão de Demandas',
+        'base-conhecimento': 'Base de Conhecimento',
+        'campos-custom': 'Campos Personalizados',
+        'configuracoes': 'Configurações'
+    };
+    return names[sectionId] || sectionId;
+}
+
+function showAlert(message, type = 'success') {
+    const container = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span> ${message}`;
+    container.appendChild(alert);
+    setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transition = 'opacity 0.5s';
+        setTimeout(() => alert.remove(), 500);
+    }, 4000);
+}
+
+function fecharModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+// ===== INICIALIZAÇÃO =====
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+});
+
+async function initApp() {
+    // Carregar configurações
+    loadConfig();
+    
+    // Se Google Sheets estiver configurado, tentar baixar dados
+    if (CONFIG.usarGoogleSheets && CONFIG.googleApiUrl) {
+        try {
+            updateSyncStatus('syncing', '⏳ Carregando...');
+            
+            // LIMPAR dados locais
+            storageSet(STORAGE_KEYS.ATAS, []);
+            storageSet(STORAGE_KEYS.ACOES, []);
+            storageSet(STORAGE_KEYS.DEMANDAS, []);
+            storageSet(STORAGE_KEYS.BASE_CONHECIMENTO, []);
+            storageSet(STORAGE_KEYS.FLUXOGRAMAS, {});  // ← ADICIONAR
+            
+            const configNuvem = await googleSheetsGet('config', 'principal');
+            if (configNuvem) {
+                const configLocal = storageGet(STORAGE_KEYS.CONFIG) || {};
+                storageSet(STORAGE_KEYS.CONFIG, { ...configLocal, ...configNuvem });
+                loadConfig();
+            }
+            
+            // Baixar ATAS
+            const atasNuvem = await googleSheetsGetAll('atas');
+            if (atasNuvem && atasNuvem.length > 0) {
+                const atasMap = new Map();
+                const atasLocais = storageGet(STORAGE_KEYS.ATAS) || [];
+                atasLocais.forEach(a => atasMap.set(a.id, a));
+                atasNuvem.forEach(a => {
+                    if (!atasMap.has(a.id) || (a.dataAtualizacao > atasMap.get(a.id).dataAtualizacao)) {
+                        atasMap.set(a.id, a);
+                    }
+                });
+                storageSet(STORAGE_KEYS.ATAS, Array.from(atasMap.values()));
+            }
+            
+            // Baixar AÇÕES
+            const acoesNuvem = await googleSheetsGetAll('acoes');
+            if (acoesNuvem && acoesNuvem.length > 0) {
+                const acoesMap = new Map();
+                const acoesLocais = storageGet(STORAGE_KEYS.ACOES) || [];
+                acoesLocais.forEach(a => acoesMap.set(a.id, a));
+                acoesNuvem.forEach(a => {
+                    if (!acoesMap.has(a.id) || (a.dataAtualizacao > acoesMap.get(a.id).dataAtualizacao)) {
+                        acoesMap.set(a.id, a);
+                    }
+                });
+                storageSet(STORAGE_KEYS.ACOES, Array.from(acoesMap.values()));
+            }
+            
+            // Baixar DEMANDAS
+            const demandasNuvem = await googleSheetsGetAll('demandas');
+            if (demandasNuvem && demandasNuvem.length > 0) {
+                const demandasMap = new Map();
+                const demandasLocais = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+                demandasLocais.forEach(d => demandasMap.set(d.id, d));
+                demandasNuvem.forEach(d => {
+                    if (!demandasMap.has(d.id) || (d.dataAtualizacao > demandasMap.get(d.id).dataAtualizacao)) {
+                        demandasMap.set(d.id, d);
+                    }
+                });
+                storageSet(STORAGE_KEYS.DEMANDAS, Array.from(demandasMap.values()));
+            }
+            
+            // Baixar FLUXOGRAMAS
+            const fluxosNuvem = await googleSheetsGetAll('fluxogramas');
+            if (fluxosNuvem && fluxosNuvem.length > 0) {
+                const fluxosLocal = {};
+                fluxosNuvem.forEach(f => {
+                    if (f && Array.isArray(f) && f.length > 0) {
+                        const ataId = f[0].ataId;
+                        if (ataId) fluxosLocal[ataId] = f;
+                    }
+                });
+                storageSet(STORAGE_KEYS.FLUXOGRAMAS, fluxosLocal);
+            }
+            
+            // Baixar CAMPOS PERSONALIZADOS
+            const camposNuvem = await googleSheetsGet('campos_custom', 'todos');
+            if (camposNuvem) {
+                storageSet(STORAGE_KEYS.CAMPOS_CUSTOM, camposNuvem);
+            }
+            
+            // Baixar BASE DE CONHECIMENTO
+            const baseNuvem = await googleSheetsGetAll('base_conhecimento');
+            if (baseNuvem && baseNuvem.length > 0) {
+                storageSet(STORAGE_KEYS.BASE_CONHECIMENTO, baseNuvem);
+            }
+            
+            updateSyncStatus('synced', '☁️ Nuvem');
+        } catch (e) {
+            console.error('Erro ao carregar da nuvem:', e);
+            updateSyncStatus('error', '⚠️ Offline');
+        }
+    } else {
+        updateSyncStatus('synced', '💾 Local');
+    }
+    
+    // Inicializar interface
+    loadDashboard();
+    renderMembrosPresentes();
+    document.getElementById('dataReuniao').value = new Date().toISOString().split('T')[0];
+}
+
+// ===== CONFIGURAÇÕES =====
+function loadConfig() {
+    let config = storageGet(STORAGE_KEYS.CONFIG);
+    
+    if (!config) {
+        config = {
+            unidade: '',
+            cnpj: '',
+            endereco: '',
+            membros: [],
+            convidados: [],
+            setores: [],
+            senhaBloqueio: 'CIPA@SantoAndre',
+            senhaCadastrada: false
+        };
+        storageSet(STORAGE_KEYS.CONFIG, config);
+    }
+    
+    // SEMPRE usar URL fixa
+    CONFIG.googleApiUrl = GOOGLE_API_URL;
+    CONFIG.usarGoogleSheets = USAR_GOOGLE_SHEETS;
+    
+    // Senha: se já foi cadastrada, manter; senão, usar a padrão
+    if (config.senhaCadastrada && config.senhaBloqueio) {
+        CONFIG.senhaBloqueio = config.senhaBloqueio;
+    } else {
+        CONFIG.senhaBloqueio = 'CIPA@SantoAndre';
+    }
+    
+    // Garantir arrays
+    if (!config.membros) config.membros = [];
+    if (!config.convidados) config.convidados = [];
+    if (!config.setores) config.setores = [];
+    
+    // Preencher campos da UI
+    document.getElementById('configUnidade').value = config.unidade || '';
+    document.getElementById('configCnpj').value = config.cnpj || '';
+    document.getElementById('configEndereco').value = config.endereco || '';
+    
+    // Campo de senha (oculto se já cadastrada)
+    const senhaInput = document.getElementById('configSenhaBloqueio');
+    const senhaContainer = document.getElementById('configSenhaContainer');
+    
+    if (senhaInput && senhaContainer) {
+        if (config.senhaCadastrada) {
+            // Senha já cadastrada - mostrar apenas botão de alteração
+            senhaContainer.innerHTML = `
+                <label>Senha de Bloqueio</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="password" id="configSenhaBloqueio" disabled 
+                           value="********" style="flex: 1; background: var(--gray-100);">
+                    <button type="button" class="btn btn-secondary btn-sm" 
+                            onclick="alterarSenhaBloqueio()" style="white-space: nowrap;">
+                        🔒 Alterar Senha
+                    </button>
+                </div>
+                <small style="color: var(--success);">✅ Senha cadastrada e protegida</small>
+            `;
+        } else {
+            // Primeira vez - campos normais
+            senhaContainer.innerHTML = `
+                <label>Cadastrar Senha de Bloqueio *</label>
+                <input type="password" id="configSenhaBloqueio" 
+                       placeholder="Digite a senha para bloquear ATAs" required>
+                <input type="password" id="configSenhaConfirmacao" 
+                       placeholder="Confirme a senha" required>
+                <small style="color: var(--warning);">⚠️ Após cadastrada, a senha só poderá ser alterada com a senha atual</small>
+            `;
+        }
+    }
+    
+    // Esconder campos de sincronização (agora são fixos)
+    const syncSection = document.getElementById('configSyncSection');
+    if (syncSection) {
+        syncSection.innerHTML = `
+            <div style="background: #dcfce7; padding: 1rem; border-radius: var(--radius); border-left: 4px solid var(--success);">
+                <strong>☁️ Sincronização com Google Sheets</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #166534;">
+                    ✅ Configurado e ativo<br>
+                    <small style="color: #15803d;">URL: ${GOOGLE_API_URL.substring(0, 50)}...</small>
+                </p>
+            </div>
+        `;
+    }
+    
+    renderConfigMembros(config.membros);
+    renderConfigConvidados(config.convidados);
+    renderConfigSetores(config.setores);
+}
+
+function renderConfigMembros(membros) {
+    const container = document.getElementById('configMembros');
+    if (!container) return;
+    
+    if (!membros || membros.length === 0) {
+        container.innerHTML = '<p style="color: var(--gray-500)">Nenhum membro cadastrado</p>';
+        return;
+    }
+    
+    container.innerHTML = membros.map((m, i) => `
+        <div class="form-row" style="align-items: end; margin-bottom: 1rem;">
+            <div class="form-group">
+                <label>Nome</label>
+                <input type="text" placeholder="Nome" value="${escapeHtml(m.nome || '')}" id="membroNome${i}">
+            </div>
+            <div class="form-group">
+                <label>Função</label>
+                <input type="text" placeholder="Função" value="${escapeHtml(m.funcao || '')}" id="membroFuncao${i}">
+            </div>
+            <div class="form-group">
+                <label>Tipo</label>
+                <select id="membroTipo${i}">
+                    <option value="Titular" ${m.tipo === 'Titular' ? 'selected' : ''}>Titular</option>
+                    <option value="Suplente" ${m.tipo === 'Suplente' ? 'selected' : ''}>Suplente</option>
+                </select>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="removerMembro(${i})" style="margin-top: 1.5rem;">✕</button>
+        </div>
+    `).join('');
+}
+
+function adicionarMembro() {
+    let config = storageGet(STORAGE_KEYS.CONFIG);
+    if (!config) config = { membros: [], convidados: [], setores: [] };
+    if (!config.membros) config.membros = [];
+    config.membros.push({ nome: '', funcao: '', tipo: 'Titular' });
+    storageSet(STORAGE_KEYS.CONFIG, config);
+    loadConfig();
+}
+
+function removerMembro(index) {
+    let config = storageGet(STORAGE_KEYS.CONFIG);
+    if (!config || !config.membros) return;
+    config.membros.splice(index, 1);
+    storageSet(STORAGE_KEYS.CONFIG, config);
+    loadConfig();
+}
+
+function renderConfigConvidados(convidados) {
+    const container = document.getElementById('configConvidados');
+    if (!container) return;
+    
+    if (!convidados || convidados.length === 0) {
+        container.innerHTML = '<p style="color: var(--gray-500)">Nenhum convidado frequente cadastrado</p>';
+        return;
+    }
+    
+    container.innerHTML = convidados.map((c, i) => `
+        <div class="dynamic-item">
+            <input type="text" placeholder="Nome do Convidado" value="${escapeHtml(c || '')}" id="configConvidado${i}" style="flex: 1;">
+            <button class="btn btn-danger btn-sm" onclick="removerConvidadoConfig(${i})">✕</button>
+        </div>
+    `).join('');
+}
+
+function adicionarConvidadoConfig() {
+    let config = storageGet(STORAGE_KEYS.CONFIG);
+    if (!config) config = { membros: [], convidados: [], setores: [] };
+    if (!config.convidados) config.convidados = [];
+    config.convidados.push('');
+    storageSet(STORAGE_KEYS.CONFIG, config);
+    renderConfigConvidados(config.convidados);
+}
+
+function removerConvidadoConfig(index) {
+    let config = storageGet(STORAGE_KEYS.CONFIG);
+    if (!config || !config.convidados) return;
+    config.convidados.splice(index, 1);
+    storageSet(STORAGE_KEYS.CONFIG, config);
+    loadConfig();
+}
+
+function renderConfigSetores(setores) {
+    const container = document.getElementById('configSetores');
+    if (!container) return;
+    
+    if (!setores || setores.length === 0) {
+        container.innerHTML = '<p style="color: var(--gray-500)">Nenhum setor cadastrado</p>';
+        return;
+    }
+    
+    container.innerHTML = setores.map((s, i) => `
+        <div class="dynamic-item">
+            <input type="text" placeholder="Nome do Setor" value="${escapeHtml(s || '')}" id="configSetor${i}" style="flex: 1;">
+            <button class="btn btn-danger btn-sm" onclick="removerSetor(${i})">✕</button>
+        </div>
+    `).join('');
+}
+
+function adicionarSetor() {
+    let config = storageGet(STORAGE_KEYS.CONFIG);
+    if (!config) config = { membros: [], convidados: [], setores: [] };
+    if (!config.setores) config.setores = [];
+    config.setores.push('');
+    storageSet(STORAGE_KEYS.CONFIG, config);
+    renderConfigSetores(config.setores);
+}
+
+function removerSetor(index) {
+    let config = storageGet(STORAGE_KEYS.CONFIG);
+    if (!config || !config.setores) return;
+    config.setores.splice(index, 1);
+    storageSet(STORAGE_KEYS.CONFIG, config);
+    loadConfig();
+}
+
+// ===== ALTERAR SENHA DE BLOQUEIO =====
+function alterarSenhaBloqueio() {
+    const configAtual = storageGet(STORAGE_KEYS.CONFIG) || {};
+    
+    if (!configAtual.senhaCadastrada) {
+        showAlert('Nenhuma senha cadastrada ainda', 'info');
+        return;
+    }
+    
+    const senhaAtual = prompt('🔒 Digite a senha ATUAL para continuar:');
+    
+    if (!senhaAtual) {
+        showAlert('Operação cancelada', 'info');
+        return;
+    }
+    
+    if (senhaAtual !== configAtual.senhaBloqueio) {
+        showAlert('❌ Senha atual INCORRETA! A senha não foi alterada.', 'error');
+        return;
+    }
+    
+    const novaSenha = prompt('🔑 Digite a NOVA senha (mínimo 4 caracteres):');
+    
+    if (!novaSenha) {
+        showAlert('Operação cancelada', 'info');
+        return;
+    }
+    
+    if (novaSenha.length < 4) {
+        showAlert('❌ A senha deve ter pelo menos 4 caracteres', 'error');
+        return;
+    }
+    
+    const confirmacao = prompt('🔑 Confirme a NOVA senha:');
+    
+    if (novaSenha !== confirmacao) {
+        showAlert('❌ As senhas não conferem!', 'error');
+        return;
+    }
+    
+    configAtual.senhaBloqueio = novaSenha;
+    storageSet(STORAGE_KEYS.CONFIG, configAtual);
+    CONFIG.senhaBloqueio = novaSenha;
+    
+    showAlert('✅ Senha alterada com sucesso!', 'success');
+}
+
+function salvarConfig() {
+    try {
+        // Validar senha se estiver cadastrando pela primeira vez
+        const configAtual = storageGet(STORAGE_KEYS.CONFIG) || {};
+        const senhaInput = document.getElementById('configSenhaBloqueio');
+        const senhaConfirmacao = document.getElementById('configSenhaConfirmacao');
+        
+        let senhaBloqueio = configAtual.senhaBloqueio || 'CIPA@SantoAndre';
+        let senhaCadastrada = configAtual.senhaCadastrada || false;
+        
+        // Se estiver cadastrando senha pela primeira vez
+        if (!senhaCadastrada && senhaInput && !senhaInput.disabled) {
+            const novaSenha = senhaInput.value.trim();
+            const confirmacao = senhaConfirmacao ? senhaConfirmacao.value.trim() : '';
+            
+            if (!novaSenha) {
+                showAlert('Digite uma senha para bloqueio de ATAs', 'error');
+                return;
+            }
+            
+            if (novaSenha !== confirmacao) {
+                showAlert('As senhas não conferem!', 'error');
+                return;
+            }
+            
+            if (novaSenha.length < 4) {
+                showAlert('A senha deve ter pelo menos 4 caracteres', 'error');
+                return;
+            }
+            
+            senhaBloqueio = novaSenha;
+            senhaCadastrada = true;
+            showAlert('✅ Senha cadastrada com sucesso!', 'success');
+        }
+        
+        // Coletar membros
+        const membros = [];
+        document.querySelectorAll('[id^="membroNome"]').forEach((el, i) => {
+            const nome = el && el.value ? el.value.trim() : '';
+            if (nome) {
+                const funcaoEl = document.getElementById(`membroFuncao${i}`);
+                const tipoEl = document.getElementById(`membroTipo${i}`);
+                membros.push({
+                    nome,
+                    funcao: funcaoEl && funcaoEl.value ? funcaoEl.value : '',
+                    tipo: tipoEl && tipoEl.value ? tipoEl.value : 'Titular'
+                });
+            }
+        });
+
+        // Coletar convidados
+        const convidados = [];
+        document.querySelectorAll('[id^="configConvidado"]').forEach(el => {
+            if (el && el.value && el.value.trim()) {
+                convidados.push(el.value.trim());
+            }
+        });
+
+        // Coletar setores
+        const setores = [];
+        document.querySelectorAll('[id^="configSetor"]').forEach(el => {
+            if (el && el.value && el.value.trim()) {
+                setores.push(el.value.trim());
+            }
+        });
+
+        const config = {
+            unidade: document.getElementById('configUnidade')?.value?.trim() || '',
+            cnpj: document.getElementById('configCnpj')?.value?.trim() || '',
+            endereco: document.getElementById('configEndereco')?.value?.trim() || '',
+            membros,
+            convidados,
+            setores,
+            senhaBloqueio,
+            senhaCadastrada
+        };
+
+        if (storageSet(STORAGE_KEYS.CONFIG, config)) {
+            // Atualizar CONFIG global
+            CONFIG.senhaBloqueio = senhaBloqueio;
+            CONFIG.googleApiUrl = GOOGLE_API_URL;
+            CONFIG.usarGoogleSheets = USAR_GOOGLE_SHEETS;
+            
+            loadConfig();
+            renderMembrosPresentes();
+            updateSyncStatus('synced', '☁️ Sincronizado');
+            
+            if (!senhaCadastrada) {
+                showAlert('Configurações salvas! Senha de bloqueio cadastrada.', 'success');
+            } else {
+                showAlert('Configurações salvas com sucesso!', 'success');
+            }
+        } else {
+            showAlert('Erro ao salvar configurações', 'error');
+        }
+        
+    } catch (e) {
+        console.error('Erro:', e);
+        showAlert('Erro ao salvar: ' + e.message, 'error');
+    }
+}
+
+// ===== NOVA ATA =====
+function renderMembrosPresentes() {
+    const config = storageGet(STORAGE_KEYS.CONFIG) || { membros: [], convidados: [] };
+    const container = document.getElementById('membrosPresentesList');
+    
+    if (!config.membros) config.membros = [];
+    if (!config.convidados) config.convidados = [];
+    
+    if (config.membros.length === 0 && config.convidados.length === 0) {
+        container.innerHTML = '<p style="color: var(--gray-500)">Configure os membros da CIPA e convidados frequentes em Configurações</p>';
+        return;
+    }
+    
+    let html = '';
+    
+    if (config.membros.length > 0) {
+        html += '<h4 style="margin-bottom: 0.75rem; color: var(--primary);">👥 Membros da CIPA</h4>';
+        html += config.membros.map((m, i) => `
+            <div class="form-row" style="align-items: center;">
+                <div style="flex: 1;">
+                    <strong>${escapeHtml(m.nome)}</strong> - ${escapeHtml(m.funcao)} (${escapeHtml(m.tipo)})
+                </div>
+                <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="presente${i}"> Presente
+                </label>
+            </div>
+        `).join('');
+    }
+    
+    if (config.convidados.length > 0) {
+        html += '<h4 style="margin: 1.5rem 0 0.75rem; color: var(--secondary);">👤 Convidados Frequentes</h4>';
+        html += config.convidados.map((c, i) => `
+            <div class="form-row" style="align-items: center;">
+                <div style="flex: 1;">
+                    <strong>${escapeHtml(c)}</strong>
+                    <span style="color: var(--gray-500); font-size: 0.85rem; margin-left: 0.5rem;">(Convidado)</span>
+                </div>
+                <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="convidadoPresente${i}"> Presente
+                </label>
+            </div>
+        `).join('');
+    }
+    
+    container.innerHTML = html;
+}
+
+let contadorConvidados = 0;
+function adicionarConvidado() {
+    const container = document.getElementById('convidadosList');
+    const div = document.createElement('div');
+    div.className = 'dynamic-item';
+    div.innerHTML = `
+        <input type="text" placeholder="Nome do Convidado" id="convidado${contadorConvidados}">
+        <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(div);
+    contadorConvidados++;
+}
+
+let contadorAcidentes = 0;
+function adicionarAcidente() {
+    const container = document.getElementById('acidentesContainer');
+    const div = document.createElement('div');
+    div.className = 'dynamic-list';
+    div.id = `acidente${contadorAcidentes}`;
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4>Acidente ${contadorAcidentes + 1}</h4>
+            <button class="btn btn-danger btn-sm" onclick="removerAcidente(${contadorAcidentes})">✕ Remover</button>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nome do Acidentado *</label>
+                <input type="text" id="acidNome${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>Função</label>
+                <input type="text" id="acidFuncao${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>Setor</label>
+                <input type="text" id="acidSetor${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>Data do Acidente</label>
+                <input type="date" id="acidData${contadorAcidentes}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Hora</label>
+                <input type="time" id="acidHora${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>Local</label>
+                <input type="text" id="acidLocal${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>Tipo de Acidente</label>
+                <select id="acidTipo${contadorAcidentes}">
+                    <option value="">Selecione</option>
+                    <option value="Típico">Típico</option>
+                    <option value="Trajeto">Trajeto</option>
+                    <option value="Doença Ocupacional">Doença Ocupacional</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>CID (se aplicável)</label>
+                <input type="text" id="acidCid${contadorAcidentes}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Descrição do Acidente</label>
+            <textarea id="acidDescricao${contadorAcidentes}" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Parte do Corpo Atingida</label>
+                <input type="text" id="acidParteCorpo${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>Natureza da Lesão</label>
+                <input type="text" id="acidLesao${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>Agente Causador</label>
+                <input type="text" id="acidAgente${contadorAcidentes}">
+            </div>
+            <div class="form-group">
+                <label>CAT Emitida?</label>
+                <select id="acidCat${contadorAcidentes}">
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                    <option value="Pendente">Pendente</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Dias Perdidos</label>
+                <input type="number" id="acidDias${contadorAcidentes}" min="0">
+            </div>
+            <div class="form-group">
+                <label>Houve Afastamento?</label>
+                <select id="acidAfastamento${contadorAcidentes}">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Testemunhas</label>
+                <input type="text" id="acidTestemunhas${contadorAcidentes}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Causa do Acidente</label>
+            <textarea id="acidCausa${contadorAcidentes}" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Medidas Corretivas Imediatas</label>
+            <textarea id="acidMedidasImediatas${contadorAcidentes}" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Medidas Preventivas Propostas</label>
+            <textarea id="acidMedidasPreventivas${contadorAcidentes}" rows="2"></textarea>
+        </div>
+        <button type="button" class="btn btn-warning btn-sm" onclick="gerarPlanoAcao(${contadorAcidentes})">⚡ Gerar Plano de Ação</button>
+    `;
+    container.appendChild(div);
+    contadorAcidentes++;
+}
+
+function removerAcidente(id) {
+    const el = document.getElementById(`acidente${id}`);
+    if (el) el.remove();
+}
+
+let contadorTemas = 3;
+function adicionarTema() {
+    const container = document.getElementById('temasExtras');
+    const div = document.createElement('div');
+    div.className = 'form-group';
+    div.innerHTML = `
+        <label>Tema ${contadorTemas} <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()">✕</button></label>
+        <textarea id="tema${contadorTemas}" rows="3"></textarea>
+    `;
+    container.appendChild(div);
+    contadorTemas++;
+}
+
+let contadorDemandas = 0;
+function adicionarDemanda() {
+    const config = storageGet(STORAGE_KEYS.CONFIG) || { setores: [] };
+    const div = document.createElement('div');
+    div.className = 'dynamic-list';
+    div.id = `demanda${contadorDemandas}`;
+    
+    const selectSetores = config.setores.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4>Demanda ${contadorDemandas + 1}</h4>
+            <button class="btn btn-danger btn-sm" onclick="document.getElementById('demanda${contadorDemandas}').remove()">✕</button>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Setor</label>
+                <select id="demandaSetor${contadorDemandas}">
+                    <option value="">Selecione</option>
+                    ${selectSetores}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Solicitante</label>
+                <input type="text" id="demandaSolicitante${contadorDemandas}">
+            </div>
+            <div class="form-group">
+                <label>Prioridade</label>
+                <select id="demandaPrioridade${contadorDemandas}">
+                    <option value="Baixa">Baixa</option>
+                    <option value="Média" selected>Média</option>
+                    <option value="Alta">Alta</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Descrição da Demanda</label>
+            <textarea id="demandaDescricao${contadorDemandas}" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Responsável</label>
+                <input type="text" id="demandaResponsavel${contadorDemandas}">
+            </div>
+            <div class="form-group">
+                <label>Prazo</label>
+                <input type="date" id="demandaPrazo${contadorDemandas}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Resolução Proposta</label>
+            <textarea id="demandaResolucao${contadorDemandas}" rows="2"></textarea>
+        </div>
+    `;
+    document.getElementById('demandasSetores').appendChild(div);
+    contadorDemandas++;
+}
+
+let contadorAcoes = 0;
+function adicionarAcao() {
+    const tbody = document.querySelector('#tabelaAcoes tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" id="acaoDesc${contadorAcoes}" placeholder="Descrição da ação"></td>
+        <td><input type="text" id="acaoResp${contadorAcoes}" placeholder="Responsável"></td>
+        <td><input type="date" id="acaoPrazo${contadorAcoes}"></td>
+        <td>
+            <select id="acaoStatus${contadorAcoes}">
+                <option value="Pendente">Pendente</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="Concluída">Concluída</option>
+            </select>
+        </td>
+        <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    contadorAcoes++;
+}
+
+// ===== GERAR PLANO DE AÇÃO =====
+function gerarPlanoAcao(acidenteId) {
+    const nome = document.getElementById(`acidNome${acidenteId}`).value;
+    const data = document.getElementById(`acidData${acidenteId}`).value;
+    const tipo = document.getElementById(`acidTipo${acidenteId}`).value;
+    const descricao = document.getElementById(`acidDescricao${acidenteId}`).value;
+    const medidasImediatas = document.getElementById(`acidMedidasImediatas${acidenteId}`).value;
+    const medidasPreventivas = document.getElementById(`acidMedidasPreventivas${acidenteId}`).value;
+    
+    if (!nome) {
+        showAlert('Preencha o nome do acidentado primeiro', 'error');
+        return;
+    }
+    
+    document.getElementById('planoAcaoAcidenteId').value = acidenteId;
+    document.getElementById('planoAcaoDadosAcidente').innerHTML = `
+        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">📋 Dados do Acidente</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <p><strong>Acidentado:</strong> ${escapeHtml(nome) || 'Não informado'}</p>
+            <p><strong>Data:</strong> ${data ? formatDate(data) : 'Não informada'}</p>
+            <p><strong>Tipo:</strong> ${escapeHtml(tipo) || 'Não informado'}</p>
+            <p><strong>Status:</strong> Em análise</p>
+        </div>
+        ${descricao ? `<p style="margin-top: 0.5rem;"><strong>Descrição:</strong> ${escapeHtml(descricao.substring(0, 200))}${descricao.length > 200 ? '...' : ''}</p>` : ''}
+    `;
+    
+    document.getElementById('planoAcaoDescricao').value = medidasPreventivas || 
+        `Implementar medidas corretivas para o acidente ocorrido com ${nome} em ${data || 'data não informada'}`;
+    
+    const prazoDefault = new Date();
+    prazoDefault.setDate(prazoDefault.getDate() + 30);
+    document.getElementById('planoAcaoPrazo').value = prazoDefault.toISOString().split('T')[0];
+    document.getElementById('planoAcaoResponsavel').value = '';
+    document.getElementById('planoAcaoRecursos').value = '';
+    document.getElementById('planoAcaoIndicador').value = '';
+    document.getElementById('planoAcaoTipo').value = medidasPreventivas ? 'Preventiva' : 'Corretiva';
+    
+    document.getElementById('modalPlanoAcao').classList.add('active');
+}
+
+function salvarPlanoAcao() {
+    try {
+        const descricao = document.getElementById('planoAcaoDescricao').value.trim();
+        const responsavel = document.getElementById('planoAcaoResponsavel').value.trim();
+        const prazo = document.getElementById('planoAcaoPrazo').value;
+        
+        if (!descricao) { showAlert('A descrição da ação é obrigatória', 'error'); return; }
+        if (!responsavel) { showAlert('O responsável é obrigatório', 'error'); return; }
+        if (!prazo) { showAlert('O prazo é obrigatório', 'error'); return; }
+        
+        const acidenteId = document.getElementById('planoAcaoAcidenteId').value;
+        const nome = document.getElementById(`acidNome${acidenteId}`).value;
+        const data = document.getElementById(`acidData${acidenteId}`).value;
+        const setor = document.getElementById(`acidSetor${acidenteId}`).value;
+        
+        const planoAcao = {
+            id: generateId(),
+            acidenteRef: { nome, data, setor, acidenteId },
+            tipo: document.getElementById('planoAcaoTipo').value,
+            descricao,
+            responsavel,
+            prazo,
+            prioridade: document.getElementById('planoAcaoPrioridade').value,
+            recursos: document.getElementById('planoAcaoRecursos').value.trim(),
+            indicador: document.getElementById('planoAcaoIndicador').value.trim(),
+            status: 'Pendente',
+            dataCriacao: new Date().toISOString(),
+            dataAtualizacao: new Date().toISOString(),
+            ataId: document.getElementById('ataId').value || null
+        };
+        
+        const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+        acoes.push(planoAcao);
+        storageSet(STORAGE_KEYS.ACOES, acoes);
+        
+        if (CONFIG.usarGoogleSheets) {
+            googleSheetsSet('acoes', planoAcao.id, planoAcao);
+        }
+        
+        showAlert('✅ Plano de ação criado com sucesso!', 'success');
+        fecharModal('modalPlanoAcao');
+        loadDashboard();
+        loadPlanosAcao();
+        
+    } catch (e) {
+        showAlert('❌ Erro ao salvar plano de ação: ' + e.message, 'error');
+    }
+}
+
+// ===== CAMPOS PERSONALIZADOS =====
+function abrirModalCampo() {
+    document.getElementById('campoId').value = '';
+    document.getElementById('campoNome').value = '';
+    document.getElementById('campoTipo').value = 'texto';
+    document.getElementById('campoSecao').value = '1';
+    document.getElementById('campoOpcoes').value = '';
+    document.getElementById('campoOpcoesGroup').style.display = 'none';
+    document.getElementById('modalCampo').classList.add('active');
+}
+
+function toggleOpcoesCampo() {
+    const tipo = document.getElementById('campoTipo').value;
+    document.getElementById('campoOpcoesGroup').style.display = tipo === 'dropdown' ? 'block' : 'none';
+}
+
+function salvarCampoCustom() {
+    const nome = document.getElementById('campoNome').value.trim();
+    const tipo = document.getElementById('campoTipo').value;
+    const secao = document.getElementById('campoSecao').value;
+    const opcoesText = document.getElementById('campoOpcoes').value.trim();
+    
+    if (!nome) { showAlert('Nome do campo é obrigatório', 'error'); return; }
+    if (tipo === 'dropdown' && !opcoesText) {
+        showAlert('Adicione pelo menos uma opção para lista suspensa', 'error');
+        return;
+    }
+    
+    const campos = storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
+    const campoId = document.getElementById('campoId').value || generateId();
+    
+    const novoCampo = {
+        id: campoId,
+        nome,
+        tipo,
+        secao: parseInt(secao),
+        opcoes: tipo === 'dropdown' ? opcoesText.split('\n').filter(o => o.trim()) : []
+    };
+    
+    const index = campos.findIndex(c => c.id === campoId);
+    if (index >= 0) {
+        campos[index] = novoCampo;
+    } else {
+        campos.push(novoCampo);
+    }
+    
+    storageSet(STORAGE_KEYS.CAMPOS_CUSTOM, campos);
+    if (CONFIG.usarGoogleSheets) {
+        googleSheetsSet('campos_custom', 'todos', campos);
+    }
+    
+    showAlert('Campo salvo com sucesso!', 'success');
+    fecharModal('modalCampo');
+    loadCamposCustom();
+    renderCustomFields();
+}
+
+function loadCamposCustom() {
+    const campos = storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
+    const container = document.getElementById('camposCustomList');
+    
+    if (campos.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚙️</div><p>Nenhum campo personalizado criado</p></div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Nome</th><th>Tipo</th><th>Seção</th><th>Opções</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    ${campos.map(c => `
+                        <tr>
+                            <td>${escapeHtml(c.nome)}</td>
+                            <td><span class="badge badge-info">${escapeHtml(c.tipo)}</span></td>
+                            <td>Seção ${c.secao}</td>
+                            <td>${c.opcoes.length > 0 ? c.opcoes.map(o => escapeHtml(o)).join(', ') : '-'}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="excluirCampoCustom('${c.id}')">Excluir</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+async function excluirCampoCustom(id) {
+    if (!confirm('Excluir este campo personalizado?')) return;
+    const campos = storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
+    const novos = campos.filter(c => c.id !== id);
+    storageSet(STORAGE_KEYS.CAMPOS_CUSTOM, novos);
+    if (CONFIG.usarGoogleSheets) {
+        await googleSheetsSet('campos_custom', 'todos', novos);
+    }
+    loadCamposCustom();
+    renderCustomFields();
+    showAlert('Campo excluído da nuvem!', 'success');
+}
+
+function renderCustomFields() {
+    const campos = storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
+    
+    for (let i = 1; i <= 6; i++) {
+        const container = document.getElementById(`custom-fields-sec${i}`);
+        if (!container) continue;
+        
+        const camposSecao = campos.filter(c => c.secao === i);
+        if (camposSecao.length === 0) {
+            container.innerHTML = '';
+            continue;
+        }
+        
+        container.innerHTML = '<h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--secondary);">Campos Personalizados</h4>' + 
+            camposSecao.map(campo => {
+                const fieldId = `custom_${campo.id}`;
+                let input = '';
+                
+                switch (campo.tipo) {
+                    case 'texto':
+                        input = `<input type="text" id="${fieldId}">`;
+                        break;
+                    case 'numero':
+                        input = `<input type="number" id="${fieldId}">`;
+                        break;
+                    case 'data':
+                        input = `<input type="date" id="${fieldId}">`;
+                        break;
+                    case 'textarea':
+                        input = `<textarea id="${fieldId}" rows="3"></textarea>`;
+                        break;
+                    case 'dropdown':
+                        input = `<select id="${fieldId}">
+                            <option value="">Selecione</option>
+                            ${campo.opcoes.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('')}
+                        </select>`;
+                        break;
+                    case 'checkbox':
+                        return `<div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="${fieldId}" style="width: auto;">
+                                <span>${escapeHtml(campo.nome)}</span>
+                            </label>
+                        </div>`;
+                }
+                
+                return `<div class="form-group"><label>${escapeHtml(campo.nome)}</label>${input}</div>`;
+            }).join('');
+    }
+}
+
+// ===== SALVAR ATA =====
+async function salvarAta() {
+    try {
+        const dataReuniao = document.getElementById('dataReuniao').value;
+        const horaInicio = document.getElementById('horaInicio').value;
+        const local = document.getElementById('local').value.trim();
+        
+        if (!dataReuniao || !horaInicio || !local) {
+            showAlert('Preencha todos os campos obrigatórios: Data, Horário e Local', 'error');
+            return;
+        }
+        
+        const config = storageGet(STORAGE_KEYS.CONFIG) || { membros: [] };
+        const ataId = document.getElementById('ataId').value || generateId();
+        
+        // Presenças
+        const presencas = [];
+        if (config.membros && config.membros.length > 0) {
+            config.membros.forEach((m, i) => {
+                const checkbox = document.getElementById(`presente${i}`);
+                presencas.push({
+                    nome: m.nome || '',
+                    funcao: m.funcao || '',
+                    tipo: m.tipo || 'Titular',
+                    presente: checkbox ? checkbox.checked : true
+                });
+            });
+        }
+        
+        // Convidados frequentes
+        const convidadosFrequentes = [];
+        if (config.convidados && config.convidados.length > 0) {
+            config.convidados.forEach((c, i) => {
+                const checkbox = document.getElementById(`convidadoPresente${i}`);
+                convidadosFrequentes.push({
+                    nome: c,
+                    presente: checkbox ? checkbox.checked : false
+                });
+            });
+        }
+        
+        // Convidados adicionais
+        const convidadosAdicionais = [];
+        document.querySelectorAll('[id^="convidado"]:not([id*="Presente"])').forEach(el => {
+            if (el.value && el.value.trim()) {
+                convidadosAdicionais.push(el.value.trim());
+            }
+        });
+        
+        // Acidentes (apenas com nome preenchido)
+        const acidentes = [];
+        document.querySelectorAll('[id^="acidente"]').forEach((el) => {
+            const id = el.id.replace('acidente', '');
+            const nome = getValueSafe(`acidNome${id}`);
+            if (!nome || nome.trim() === '') return;
+            
+            acidentes.push({
+                nome,
+                funcao: getValueSafe(`acidFuncao${id}`),
+                setor: getValueSafe(`acidSetor${id}`),
+                data: getValueSafe(`acidData${id}`),
+                hora: getValueSafe(`acidHora${id}`),
+                local: getValueSafe(`acidLocal${id}`),
+                tipo: getValueSafe(`acidTipo${id}`),
+                cid: getValueSafe(`acidCid${id}`),
+                descricao: getValueSafe(`acidDescricao${id}`),
+                parteCorpo: getValueSafe(`acidParteCorpo${id}`),
+                lesao: getValueSafe(`acidLesao${id}`),
+                agente: getValueSafe(`acidAgente${id}`),
+                cat: getValueSafe(`acidCat${id}`),
+                dias: getValueSafe(`acidDias${id}`),
+                afastamento: getValueSafe(`acidAfastamento${id}`),
+                testemunhas: getValueSafe(`acidTestemunhas${id}`),
+                causa: getValueSafe(`acidCausa${id}`),
+                medidasImediatas: getValueSafe(`acidMedidasImediatas${id}`),
+                medidasPreventivas: getValueSafe(`acidMedidasPreventivas${id}`)
+            });
+        });
+        
+        // Temas
+        const temas = {
+            tema1: getValueSafe('tema1'),
+            tema2: getValueSafe('tema2'),
+            extras: []
+        };
+        document.querySelectorAll('[id^="tema"]:not(#tema1):not(#tema2)').forEach(el => {
+            if (el.value && el.value.trim()) {
+                temas.extras.push(el.value.trim());
+            }
+        });
+        
+        // Demandas (apenas com conteúdo)
+        const demandas = [];
+        const demandasGerais = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+        
+        document.querySelectorAll('#demandasSetores > .dynamic-list').forEach((el) => {
+            const id = el.id.replace('demanda', '');
+            const setorD = getValueSafe(`demandaSetor${id}`);
+            const solicitanteD = getValueSafe(`demandaSolicitante${id}`);
+            const descricaoD = getValueSafe(`demandaDescricao${id}`);
+            const resolucaoD = getValueSafe(`demandaResolucao${id}`);
+            const prioridadeD = getValueSafe(`demandaPrioridade${id}`);
+            const responsavelD = getValueSafe(`demandaResponsavel${id}`);
+            const prazoD = getValueSafe(`demandaPrazo${id}`);
+            
+            // Só adicionar se tiver pelo menos um campo preenchido
+            const temConteudo = setorD || solicitanteD || descricaoD || resolucaoD || responsavelD || prazoD;
+            if (!temConteudo) return;
+            
+            const demandaAta = {
+                setor: setorD,
+                solicitante: solicitanteD,
+                descricao: descricaoD,
+                resolucao: resolucaoD,
+                prioridade: prioridadeD || 'Média',
+                responsavel: responsavelD,
+                prazo: prazoD
+            };
+            
+            demandas.push(demandaAta);
+            
+            // Criar automaticamente na Gestão de Demandas (evitar duplicatas)
+            const descricaoParaGestao = descricaoD || resolucaoD || 'Demanda da reunião CIPA';
+            const setorParaGestao = setorD || 'Não especificado';
+            
+            // Verificar se já existe uma demanda igual
+            const jaExiste = demandasGerais.some(d => 
+                d.descricao === descricaoParaGestao && 
+                d.setor === setorParaGestao &&
+                d.origem === 'Reunião CIPA'
+            );
+            
+            if (!jaExiste) {
+                const novaDemanda = {
+                    id: generateId(),
+                    setor: setorParaGestao,
+                    descricao: descricaoParaGestao,
+                    origem: 'Reunião CIPA',
+                    outraOrigem: '',
+                    solicitante: solicitanteD || 'CIPA',
+                    responsavel: responsavelD || '',
+                    prazo: prazoD || new Date().toISOString().split('T')[0],
+                    prioridade: prioridadeD || 'Média',
+                    status: 'Pendente',
+                    conclusao: resolucaoD || '',
+                    observacoes: `Demanda originada da reunião CIPA do dia ${formatDate(dataReuniao)}`,
+                    dataCriacao: new Date().toISOString(),
+                    dataAtualizacao: new Date().toISOString()
+                };
+                
+                demandasGerais.push(novaDemanda);
+            }
+        });
+        
+        // Salvar as demandas na Gestão de Demandas
+        storageSet(STORAGE_KEYS.DEMANDAS, demandasGerais);
+        if (CONFIG.usarGoogleSheets) {
+            // Sincronizar a última demanda criada
+            const ultimaDemanda = demandasGerais[demandasGerais.length - 1];
+            if (ultimaDemanda) {
+                googleSheetsSet('demandas', ultimaDemanda.id, ultimaDemanda);
+            }
+        }
+        
+        // Ações
+        const acoes = [];
+        document.querySelectorAll('#tabelaAcoes tbody tr').forEach((tr) => {
+            const descEl = tr.querySelector('[id^="acaoDesc"]');
+            const respEl = tr.querySelector('[id^="acaoResp"]');
+            const prazoEl = tr.querySelector('[id^="acaoPrazo"]');
+            const statusEl = tr.querySelector('[id^="acaoStatus"]');
+            
+            if (descEl && descEl.value.trim()) {
+                acoes.push({
+                    descricao: descEl.value.trim(),
+                    responsavel: respEl ? respEl.value : '',
+                    prazo: prazoEl ? prazoEl.value : '',
+                    status: statusEl ? statusEl.value : 'Pendente'
+                });
+            }
+        });
+        
+        // Campos personalizados
+        const customFields = {};
+        const camposCustom = storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
+        camposCustom.forEach(campo => {
+            const el = document.getElementById(`custom_${campo.id}`);
+            if (el) {
+                customFields[campo.id] = campo.tipo === 'checkbox' ? el.checked : (el.value || '');
+            }
+        });
+        
+        // Montar objeto ATA
+        const ata = {
+            id: ataId,
+            timestamp: Date.now(),
+            dataAtualizacao: new Date().toISOString(),
+            dadosConfiguracao: {
+                unidade: config.unidade || '',
+                cnpj: config.cnpj || '',
+                endereco: config.endereco || '',
+                membros: JSON.parse(JSON.stringify(config.membros || [])),
+                convidados: JSON.parse(JSON.stringify(config.convidados || [])),
+                setores: JSON.parse(JSON.stringify(config.setores || [])),
+                camposCustom: JSON.parse(JSON.stringify(camposCustom || []))
+            },
+            secao1: { dataReuniao, horaInicio, horaTermino: getValueSafe('horaTermino'), local },
+            secao2: { presencas },
+            secao3: { convidadosFrequentes, convidadosAdicionais },
+            secao4: { acidentes },
+            secao5: { temas, demandas },
+            secao6: { acoes },
+            observacoes: getValueSafe('observacoes'),
+            customFields,
+            unidade: config.unidade || 'Não informado',
+            status: 'Pré ATA',
+            bloqueada: false
+        };
+        
+        // Salvar
+        const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+        const index = atas.findIndex(a => a.id === ataId);
+        if (index >= 0) {
+            atas[index] = ata;
+        } else {
+            atas.push(ata);
+        }
+        
+        storageSet(STORAGE_KEYS.ATAS, atas);
+        
+        if (CONFIG.usarGoogleSheets) {
+            googleSheetsSet('atas', ataId, ata);
+        }
+        
+        showAlert('✓ ATA salva com sucesso!', 'success');
+        
+        setTimeout(() => {
+            if (confirm('ATA salva! Deseja limpar o formulário para criar uma nova?')) {
+                limparFormulario();
+            }
+        }, 500);
+        
+        loadDashboard();
+        loadAtasSalvas();
+        
+    } catch (e) {
+        showAlert('✕ Erro ao salvar ATA: ' + e.message, 'error');
+    }
+}
+
+function getValueSafe(elementId) {
+    const element = document.getElementById(elementId);
+    return element ? (element.value || '') : '';
+}
+
+function cancelarEdicaoAta() {
+    if (confirm('Cancelar edição da ATA? O formulário será limpo.')) {
+        limparFormulario();
+        document.getElementById('btnCancelarEdicao').style.display = 'none';
+        showAlert('Edição cancelada.', 'info');
+    }
+}
+
+function limparFormulario() {
+    document.getElementById('formAta').reset();
+    document.getElementById('ataId').value = '';
+    document.getElementById('dataReuniao').value = new Date().toISOString().split('T')[0];
+    document.getElementById('convidadosList').innerHTML = '';
+    document.getElementById('acidentesContainer').innerHTML = '';
+    document.getElementById('temasExtras').innerHTML = '';
+    document.getElementById('demandasSetores').innerHTML = '';
+    document.querySelector('#tabelaAcoes tbody').innerHTML = '';
+    contadorConvidados = 0;
+    contadorAcidentes = 0;
+    contadorTemas = 3;
+    contadorDemandas = 0;
+    contadorAcoes = 0;
+    document.getElementById('btnCancelarEdicao').style.display = 'none';
+    
+    // Recriar checkboxes zerados
+    const config = storageGet(STORAGE_KEYS.CONFIG) || { membros: [], convidados: [] };
+    
+    // Desmarcar todos os membros
+    if (config.membros) {
+        config.membros.forEach((m, i) => {
+            const cb = document.getElementById(`presente${i}`);
+            if (cb) cb.checked = false;
+        });
+    }
+    
+    // Desmarcar todos os convidados
+    if (config.convidados) {
+        config.convidados.forEach((c, i) => {
+            const cb = document.getElementById(`convidadoPresente${i}`);
+            if (cb) cb.checked = false;
+        });
+    }
+    
+    showAlert('Formulário limpo', 'info');
+}
+
+// ===== ATAS SALVAS =====
+function loadAtasSalvas() {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const container = document.getElementById('atasSalvasList');
+    
+    if (atas.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>Nenhuma ATA salva ainda</p></div>';
+        return;
+    }
+    
+    atas.sort((a, b) => b.timestamp - a.timestamp);
+    
+    container.innerHTML = `
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Unidade</th>
+                        <th>Local</th>
+                        <th>Acidentes</th>
+                        <th>Ações</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${atas.map(ata => `
+                        <tr>
+                            <td>${formatDate(ata.secao1.dataReuniao)} ${ata.secao1.horaInicio}</td>
+                            <td>${escapeHtml(ata.unidade)}</td>
+                            <td>${escapeHtml(ata.secao1.local)}</td>
+                            <td><span class="badge badge-${ata.secao4.acidentes.length > 0 ? 'warning' : 'success'}">${ata.secao4.acidentes.length}</span></td>
+                            <td>${ata.secao6.acoes.length}</td>
+                            <td>
+                                ${ata.bloqueada ? 
+                                    `<span class="badge badge-success" style="cursor: pointer;" onclick="desbloquearAta('${ata.id}')" title="Clique para desbloquear">🔒 ${escapeHtml(ata.status)}</span>` 
+                                    : 
+                                    `<select onchange="alterarStatusAta('${ata.id}', this.value)" style="width: auto; padding: 0.25rem; font-size: 0.8rem;">
+                                        <option value="Pré ATA" ${ata.status === 'Pré ATA' ? 'selected' : ''}>Pré ATA</option>
+                                        <option value="Em andamento" ${ata.status === 'Em andamento' ? 'selected' : ''}>Em andamento</option>
+                                        <option value="Finalizada" ${ata.status === 'Finalizada' ? 'selected' : ''}>Finalizada</option>
+                                    </select>`
+                                }
+                            </td>
+                            <td style="white-space: nowrap;">
+                                <button class="btn btn-primary btn-sm" onclick="visualizarAta('${ata.id}')">👁️</button>
+                                <button class="btn btn-secondary btn-sm" onclick="editarAta('${ata.id}')">✏️</button>
+                                <button class="btn btn-secondary btn-sm" onclick="duplicarAta('${ata.id}')">📋</button>
+                                <button class="btn btn-danger btn-sm" onclick="excluirAta('${ata.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function visualizarAta(id) {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const ata = atas.find(a => a.id === id);
+    if (!ata) { showAlert('ATA não encontrada', 'error'); return; }
+    
+    const camposCustom = (ata.dadosConfiguracao && ata.dadosConfiguracao.camposCustom) 
+        ? ata.dadosConfiguracao.camposCustom 
+        : storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
+    
+    let html = `
+        <div style="padding: 2rem;">
+            <div class="print-only" style="text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 1rem;">
+                <h1 style="margin-bottom: 0.5rem;">ATA DE REUNIÃO CIPA</h1>
+                <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.25rem;">
+                    ${escapeHtml(ata.dadosConfiguracao ? ata.dadosConfiguracao.unidade : ata.unidade || 'Não informado')}
+                </p>
+                ${ata.dadosConfiguracao && ata.dadosConfiguracao.cnpj ? `
+                    <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+                        <strong>CNPJ:</strong> ${escapeHtml(ata.dadosConfiguracao.cnpj)}
+                    </p>
+                ` : ''}
+                ${ata.dadosConfiguracao && ata.dadosConfiguracao.endereco ? `
+                    <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+                        <strong>Endereço:</strong> ${escapeHtml(ata.dadosConfiguracao.endereco)}
+                    </p>
+                ` : ''}
+            </div>
+            
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">Seção 1 - Abertura</h2>
+            <p><strong>Data:</strong> ${formatDate(ata.secao1.dataReuniao)}</p>
+            <p><strong>Horário:</strong> ${ata.secao1.horaInicio} - ${ata.secao1.horaTermino || 'N/I'}</p>
+            <p><strong>Local:</strong> ${escapeHtml(ata.secao1.local)}</p>
+            ${renderCustomFieldsView(ata.customFields, camposCustom, 1)}
+            
+            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 2 - Presenças</h2>
+            <h3 style="color: var(--primary); font-size: 1rem;">👥 Membros da CIPA</h3>
+            <ul>
+                ${ata.secao2.presencas.map(p => `
+                    <li>${p.presente ? '✓' : '✕'} ${escapeHtml(p.nome)} - ${escapeHtml(p.funcao)} (${escapeHtml(p.tipo)})</li>
+                `).join('')}
+            </ul>
+            ${ata.secao3.convidadosFrequentes && ata.secao3.convidadosFrequentes.length > 0 ? `
+                <h3 style="color: var(--secondary); font-size: 1rem; margin-top: 1rem;">👤 Convidados Frequentes</h3>
+                <ul>
+                    ${ata.secao3.convidadosFrequentes.map(c => `
+                        <li>${c.presente ? '✓' : '✕'} ${escapeHtml(c.nome)} (Convidado)</li>
+                    `).join('')}
+                </ul>
+            ` : ''}
+            ${renderCustomFieldsView(ata.customFields, camposCustom, 2)}
+            
+            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 3 - Convidados Adicionais</h2>
+            ${ata.secao3.convidadosAdicionais && ata.secao3.convidadosAdicionais.length > 0 ? 
+                `<ul>${ata.secao3.convidadosAdicionais.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : 
+                '<p>Nenhum convidado adicional</p>'}
+            ${renderCustomFieldsView(ata.customFields, camposCustom, 3)}
+            
+            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 4 - Acidentes</h2>
+            ${ata.secao4.acidentes.filter(a => a && a.nome && a.nome.trim()).length > 0 ? 
+                ata.secao4.acidentes.filter(a => a && a.nome && a.nome.trim()).map((a, i) => `
+                    <div style="border: 1px solid var(--gray-300); padding: 1rem; margin-bottom: 1rem; border-radius: var(--radius);">
+                        <h4>Acidente ${i + 1} - ${escapeHtml(a.nome)}</h4>
+                        <p><strong>Função:</strong> ${escapeHtml(a.funcao || 'N/I')} | <strong>Setor:</strong> ${escapeHtml(a.setor || 'N/I')}</p>
+                        <p><strong>Data/Local:</strong> ${formatDate(a.data)} às ${a.hora || 'N/I'} - ${escapeHtml(a.local || 'N/I')}</p>
+                        <p><strong>Tipo:</strong> ${escapeHtml(a.tipo || 'N/I')} | <strong>CAT:</strong> ${escapeHtml(a.cat || 'N/I')}</p>
+                        <p><strong>Descrição:</strong> ${escapeHtml(a.descricao || 'N/I')}</p>
+                        <p><strong>Causa:</strong> ${escapeHtml(a.causa || 'N/I')}</p>
+                        <p><strong>Medidas Imediatas:</strong> ${escapeHtml(a.medidasImediatas || 'N/I')}</p>
+                        <p><strong>Medidas Preventivas:</strong> ${escapeHtml(a.medidasPreventivas || 'N/I')}</p>
+                    </div>
+                `).join('') : '<p>Nenhum acidente registrado</p>'}
+            ${renderCustomFieldsView(ata.customFields, camposCustom, 4)}
+            
+            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 5 - Pauta</h2>
+            <p><strong>Tema 1:</strong> ${escapeHtml(ata.secao5.temas.tema1 || 'N/I')}</p>
+            <p><strong>Tema 2:</strong> ${escapeHtml(ata.secao5.temas.tema2 || 'N/I')}</p>
+            ${ata.secao5.temas.extras.map((t, i) => `<p><strong>Tema ${i+3}:</strong> ${escapeHtml(t)}</p>`).join('')}
+            
+            <h3 style="margin-top: 1.5rem;">Demandas por Setor</h3>
+            ${ata.secao5.demandas.length > 0 ? 
+                ata.secao5.demandas.filter(d => d.setor || d.solicitante || d.descricao || d.resolucao).map(d => `
+                    <div style="border-left: 3px solid var(--secondary); padding-left: 1rem; margin-bottom: 1rem;">
+                        ${d.setor ? `<p><strong>${escapeHtml(d.setor)}</strong>${d.solicitante ? ` - ${escapeHtml(d.solicitante)}` : ''}</p>` : ''}
+                        ${d.prioridade ? `<p><strong>Prioridade:</strong> <span class="badge badge-${d.prioridade === 'Alta' ? 'danger' : d.prioridade === 'Média' ? 'warning' : 'info'}">${escapeHtml(d.prioridade)}</span></p>` : ''}
+                        ${d.descricao ? `<p>${escapeHtml(d.descricao)}</p>` : ''}
+                        ${d.responsavel ? `<p><strong>Responsável:</strong> ${escapeHtml(d.responsavel)}</p>` : ''}
+                        ${d.prazo ? `<p><strong>Prazo:</strong> ${formatDate(d.prazo)}</p>` : ''}
+                    </div>
+                `).join('') : '<p>Nenhuma demanda</p>'}
+            ${renderCustomFieldsView(ata.customFields, camposCustom, 5)}
+            
+            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 6 - Plano de Ações</h2>
+            ${ata.secao6.acoes.length > 0 ? `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead><tr style="background: var(--gray-100);">
+                        <th style="padding: 0.5rem; text-align: left;">Ação</th>
+                        <th style="padding: 0.5rem;">Responsável</th>
+                        <th style="padding: 0.5rem;">Prazo</th>
+                        <th style="padding: 0.5rem;">Status</th>
+                    </tr></thead>
+                    <tbody>
+                        ${ata.secao6.acoes.map(a => `
+                            <tr style="border-bottom: 1px solid var(--gray-200);">
+                                <td style="padding: 0.5rem;">${escapeHtml(a.descricao)}</td>
+                                <td style="padding: 0.5rem;">${escapeHtml(a.responsavel)}</td>
+                                <td style="padding: 0.5rem;">${formatDate(a.prazo)}</td>
+                                <td style="padding: 0.5rem;"><span class="badge badge-${a.status === 'Concluída' ? 'success' : 'warning'}">${escapeHtml(a.status)}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : '<p>Nenhuma ação definida</p>'}
+            ${renderCustomFieldsView(ata.customFields, camposCustom, 6)}
+            
+            ${ata.observacoes ? `
+                <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Observações</h2>
+                <p>${escapeHtml(ata.observacoes)}</p>
+            ` : ''}
+            
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--gray-300); font-size: 0.875rem; color: var(--gray-500);">
+                <p>ATA gerada em ${new Date(ata.dataAtualizacao).toLocaleString('pt-BR')}</p>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('visualizarContent').innerHTML = html;
+    document.getElementById('modalVisualizar').classList.add('active');
+}
+
+function renderCustomFieldsView(customFields, camposDefinicao, secao) {
+    if (!customFields) return '';
+    const campos = camposDefinicao.filter(c => c.secao === secao);
+    if (campos.length === 0) return '';
+    
+    const camposComValor = campos.filter(c => {
+        const valor = customFields[c.id];
+        if (c.tipo === 'checkbox') return valor === true || valor === 'true';
+        return valor !== undefined && valor !== null && valor !== '';
+    });
+    
+    if (camposComValor.length === 0) return '';
+    
+    return `
+        <div style="margin-top: 1rem; padding: 1rem; background: var(--gray-50); border-radius: var(--radius); border-left: 3px solid var(--secondary);">
+            <strong style="color: var(--primary);">Campos Personalizados:</strong>
+            ${camposComValor.map(c => {
+                const valor = customFields[c.id];
+                let valorFormatado;
+                if (c.tipo === 'checkbox') {
+                    valorFormatado = (valor === true || valor === 'true') ? '☑ Sim' : '☐ Não';
+                } else if (c.tipo === 'data' && valor) {
+                    valorFormatado = formatDate(valor);
+                } else {
+                    valorFormatado = valor || 'N/I';
+                }
+                return `<p style="margin: 0.25rem 0;"><strong>${escapeHtml(c.nome)}:</strong> ${escapeHtml(String(valorFormatado))}</p>`;
+            }).join('')}
+        </div>
+    `;
+}
+
+function editarAta(id) {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const ata = atas.find(a => a.id === id);
+    if (!ata) { showAlert('ATA não encontrada', 'error'); return; }
+    
+    if (ata.bloqueada) {
+        const senha = prompt('🔒 Esta ATA está BLOQUEADA. Digite a senha para editar:');
+        if (senha !== CONFIG.senhaBloqueio) {
+            showAlert('❌ Senha incorreta!', 'error');
+            return;
+        }
+        showAlert('🔓 ATA desbloqueada para edição.', 'info');
+    }
+    
+    document.getElementById('ataId').value = ata.id;
+    document.getElementById('btnCancelarEdicao').style.display = 'inline-flex';
+    document.getElementById('dataReuniao').value = ata.secao1.dataReuniao;
+    document.getElementById('horaInicio').value = ata.secao1.horaInicio;
+    document.getElementById('horaTermino').value = ata.secao1.horaTermino;
+    document.getElementById('local').value = ata.secao1.local;
+    document.getElementById('tema1').value = ata.secao5.temas.tema1 || '';
+    document.getElementById('tema2').value = ata.secao5.temas.tema2 || '';
+    document.getElementById('observacoes').value = ata.observacoes || '';
+    
+    // Limpar containers
+    document.getElementById('convidadosList').innerHTML = '';
+    document.getElementById('acidentesContainer').innerHTML = '';
+    document.getElementById('temasExtras').innerHTML = '';
+    document.getElementById('demandasSetores').innerHTML = '';
+    document.querySelector('#tabelaAcoes tbody').innerHTML = '';
+    
+    contadorConvidados = 0;
+    contadorAcidentes = 0;
+    contadorTemas = 3;
+    contadorDemandas = 0;
+    contadorAcoes = 0;
+    
+    // Restaurar convidados adicionais
+    if (ata.secao3.convidadosAdicionais) {
+        ata.secao3.convidadosAdicionais.forEach(nome => {
+            adicionarConvidado();
+            document.getElementById(`convidado${contadorConvidados-1}`).value = nome;
+        });
+    }
+    
+    // Restaurar acidentes (apenas com nome)
+    if (ata.secao4.acidentes) {
+        ata.secao4.acidentes.filter(a => a && a.nome && a.nome.trim()).forEach(acidente => {
+            adicionarAcidente();
+            const idx = contadorAcidentes - 1;
+            document.getElementById(`acidNome${idx}`).value = acidente.nome || '';
+            document.getElementById(`acidFuncao${idx}`).value = acidente.funcao || '';
+            document.getElementById(`acidSetor${idx}`).value = acidente.setor || '';
+            document.getElementById(`acidData${idx}`).value = acidente.data || '';
+            document.getElementById(`acidHora${idx}`).value = acidente.hora || '';
+            document.getElementById(`acidLocal${idx}`).value = acidente.local || '';
+            document.getElementById(`acidTipo${idx}`).value = acidente.tipo || '';
+            document.getElementById(`acidCid${idx}`).value = acidente.cid || '';
+            document.getElementById(`acidDescricao${idx}`).value = acidente.descricao || '';
+            document.getElementById(`acidParteCorpo${idx}`).value = acidente.parteCorpo || '';
+            document.getElementById(`acidLesao${idx}`).value = acidente.lesao || '';
+            document.getElementById(`acidAgente${idx}`).value = acidente.agente || '';
+            document.getElementById(`acidCat${idx}`).value = acidente.cat || 'Não';
+            document.getElementById(`acidDias${idx}`).value = acidente.dias || '';
+            document.getElementById(`acidAfastamento${idx}`).value = acidente.afastamento || 'Não';
+            document.getElementById(`acidTestemunhas${idx}`).value = acidente.testemunhas || '';
+            document.getElementById(`acidCausa${idx}`).value = acidente.causa || '';
+            document.getElementById(`acidMedidasImediatas${idx}`).value = acidente.medidasImediatas || '';
+            document.getElementById(`acidMedidasPreventivas${idx}`).value = acidente.medidasPreventivas || '';
+        });
+    }
+    
+    // Restaurar demandas (apenas com conteúdo)
+    if (ata.secao5.demandas) {
+        ata.secao5.demandas.filter(d => d.setor || d.solicitante || d.descricao || d.resolucao).forEach(demanda => {
+            adicionarDemanda();
+            const idx = contadorDemandas - 1;
+            document.getElementById(`demandaSetor${idx}`).value = demanda.setor || '';
+            document.getElementById(`demandaSolicitante${idx}`).value = demanda.solicitante || '';
+            document.getElementById(`demandaDescricao${idx}`).value = demanda.descricao || '';
+            document.getElementById(`demandaResolucao${idx}`).value = demanda.resolucao || '';
+            document.getElementById(`demandaPrioridade${idx}`).value = demanda.prioridade || 'Média';
+            document.getElementById(`demandaResponsavel${idx}`).value = demanda.responsavel || '';
+            document.getElementById(`demandaPrazo${idx}`).value = demanda.prazo || '';
+        });
+    }
+    
+    // Restaurar temas extras
+    if (ata.secao5.temas.extras) {
+        ata.secao5.temas.extras.forEach(tema => {
+            adicionarTema();
+            document.getElementById(`tema${contadorTemas - 1}`).value = tema;
+        });
+    }
+    
+    // Restaurar ações
+    if (ata.secao6.acoes) {
+        ata.secao6.acoes.filter(a => a.descricao && a.descricao.trim()).forEach(acao => {
+            adicionarAcao();
+            const idx = contadorAcoes - 1;
+            document.getElementById(`acaoDesc${idx}`).value = acao.descricao || '';
+            document.getElementById(`acaoResp${idx}`).value = acao.responsavel || '';
+            document.getElementById(`acaoPrazo${idx}`).value = acao.prazo || '';
+            document.getElementById(`acaoStatus${idx}`).value = acao.status || 'Pendente';
+        });
+    }
+    
+    // Restaurar presenças
+    setTimeout(() => {
+        if (ata.secao2.presencas) {
+            ata.secao2.presencas.forEach((p, i) => {
+                const cb = document.getElementById(`presente${i}`);
+                if (cb) cb.checked = p.presente === true;
+            });
+        }
+        if (ata.secao3.convidadosFrequentes) {
+            ata.secao3.convidadosFrequentes.forEach((c, i) => {
+                const cb = document.getElementById(`convidadoPresente${i}`);
+                if (cb) cb.checked = c.presente === true;
+            });
+        }
+        
+        // Restaurar campos personalizados
+        if (ata.customFields) {
+            const camposCustom = storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
+            camposCustom.forEach(campo => {
+                const el = document.getElementById(`custom_${campo.id}`);
+                if (el && ata.customFields[campo.id] !== undefined) {
+                    if (campo.tipo === 'checkbox') {
+                        el.checked = ata.customFields[campo.id] === true || ata.customFields[campo.id] === 'true';
+                    } else {
+                        el.value = ata.customFields[campo.id] || '';
+                    }
+                }
+            });
+        }
+    }, 300);
+    
+    // Usar membros CONGELADOS da ATA, não os atuais
+    if (ata.dadosConfiguracao && ata.dadosConfiguracao.membros) {
+        // Salvar membros atuais temporariamente
+        const configAtual = storageGet(STORAGE_KEYS.CONFIG) || {};
+        const membrosAtuais = configAtual.membros;
+        const convidadosAtuais = configAtual.convidados;
+        
+        // Substituir pelos membros da época da ATA
+        configAtual.membros = ata.dadosConfiguracao.membros;
+        configAtual.convidados = ata.dadosConfiguracao.convidados || [];
+        storageSet(STORAGE_KEYS.CONFIG, configAtual);
+        
+        // Renderizar com os membros antigos
+        renderMembrosPresentes();
+        
+        // Restaurar membros atuais
+        configAtual.membros = membrosAtuais;
+        configAtual.convidados = convidadosAtuais;
+        storageSet(STORAGE_KEYS.CONFIG, configAtual);
+    } else {
+        renderMembrosPresentes();
+    }
+    renderCustomFields();
+    
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('nova-ata').classList.add('active');
+    document.querySelectorAll('.nav-btn')[1].classList.add('active');
+    
+    showAlert('ATA carregada para edição', 'info');
+}
+
+function duplicarAta(id) {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const ata = atas.find(a => a.id === id);
+    if (!ata) return;
+    
+    const novaAta = JSON.parse(JSON.stringify(ata));
+    novaAta.id = generateId();
+    novaAta.timestamp = Date.now();
+    novaAta.dataAtualizacao = new Date().toISOString();
+    novaAta.status = 'Pré ATA';
+    novaAta.bloqueada = false;
+    
+    atas.push(novaAta);
+    storageSet(STORAGE_KEYS.ATAS, atas);
+    if (CONFIG.usarGoogleSheets) {
+        googleSheetsSet('atas', novaAta.id, novaAta);
+    }
+    
+    loadAtasSalvas();
+    showAlert('ATA duplicada com sucesso!', 'success');
+}
+
+async function excluirAta(id) {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const ata = atas.find(a => a.id === id);
+    
+    if (!ata) {
+        showAlert('ATA não encontrada', 'error');
+        return;
+    }
+    
+    // Verificar se está finalizada
+    if (ata.status === 'Finalizada' || ata.bloqueada) {
+        showAlert('🔒 Esta ATA está FINALIZADA e não pode ser excluída!', 'error');
+        return;
+    }
+    
+    // Verificar se precisa de senha para excluir
+    if (ata.status === 'Em andamento') {
+        const senha = prompt('⚠️ Esta ATA está EM ANDAMENTO. Digite a senha para excluir:');
+        if (senha !== CONFIG.senhaBloqueio) {
+            showAlert('❌ Senha incorreta! A ATA não foi excluída.', 'error');
+            return;
+        }
+    }
+    
+    if (!confirm(`Excluir esta ATA permanentemente?\n\nData: ${formatDate(ata.secao1.dataReuniao)}\nLocal: ${ata.secao1.local}`)) return;
+    
+    storageSet(STORAGE_KEYS.ATAS, atas.filter(a => a.id !== id));
+    if (CONFIG.usarGoogleSheets) {
+        await googleSheetsDelete('atas', id);
+    }
+    loadAtasSalvas();
+    loadDashboard();
+    showAlert('ATA excluída da nuvem!', 'success');
+}
+
+function imprimirAta() {
+    window.print();
+}
+
+// ===== PLANOS DE AÇÃO =====
+function criarPlanoManual() {
+    document.getElementById('editarPlanoId').value = '';
+    document.getElementById('modalEditarPlanoTitulo').textContent = 'Novo Plano de Ação Manual';
+    document.getElementById('editarPlanoTipo').value = 'Manual';
+    document.getElementById('editarPlanoDescricao').value = '';
+    document.getElementById('editarPlanoResponsavel').value = '';
+    document.getElementById('editarPlanoPrazo').value = '';
+    document.getElementById('editarPlanoPrioridade').value = 'Média';
+    document.getElementById('editarPlanoStatus').value = 'Pendente';
+    document.getElementById('editarPlanoRecursos').value = '';
+    document.getElementById('editarPlanoIndicador').value = '';
+    document.getElementById('editarPlanoDadosAcidente').style.display = 'none';
+    document.getElementById('modalEditarPlano').classList.add('active');
+}
+
+function loadPlanosAcao() {
+    const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+    const container = document.getElementById('planosAcaoList');
+    
+    if (acoes.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✓</div><p>Nenhum plano de ação criado</p></div>';
+        return;
+    }
+    
+    const prioridadeOrder = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+    acoes.sort((a, b) => {
+        const pComp = (prioridadeOrder[b.prioridade] || 0) - (prioridadeOrder[a.prioridade] || 0);
+        if (pComp !== 0) return pComp;
+        return new Date(b.dataCriacao) - new Date(a.dataCriacao);
+    });
+    
+    container.innerHTML = `
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Origem</th>
+                        <th>Responsável</th>
+                        <th>Prazo</th>
+                        <th>Prioridade</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${acoes.map(a => `
+                        <tr style="${a.prioridade === 'Alta' ? 'background: #fef2f2;' : ''}">
+                            <td><span class="badge badge-info">${escapeHtml(a.tipo || 'Manual')}</span></td>
+                            <td>
+                                <div style="max-width: 300px;">
+                                    <strong>${escapeHtml(a.descricao || '')}</strong>
+                                    ${a.acidenteRef ? `<br><small style="color: var(--gray-500);">Acidente: ${escapeHtml(a.acidenteRef.nome)} - ${formatDate(a.acidenteRef.data)}</small>` : ''}
+                                </div>
+                            </td>
+                            <td>${a.acidenteRef ? 'Acidente de Trabalho' : escapeHtml(a.origem || 'Manual')}</td>
+                            <td>
+                                <span contenteditable="true" 
+                                      onblur="atualizarAcao('${a.id}', 'responsavel', this.textContent)"
+                                      style="cursor: text; min-width: 100px; display: inline-block;">
+                                    ${escapeHtml(a.responsavel || 'Clique para editar')}
+                                </span>
+                            </td>
+                            <td>
+                                <input type="date" value="${a.prazo || ''}" 
+                                       onchange="atualizarAcao('${a.id}', 'prazo', this.value)" 
+                                       style="width: auto; font-size: 0.85rem;">
+                            </td>
+                            <td><span class="badge badge-${a.prioridade === 'Alta' ? 'danger' : a.prioridade === 'Média' ? 'warning' : 'info'}">${escapeHtml(a.prioridade || 'Média')}</span></td>
+                            <td>
+                                <select onchange="atualizarAcao('${a.id}', 'status', this.value)" style="font-size: 0.8rem;">
+                                    <option value="Pendente" ${a.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                                    <option value="Em andamento" ${a.status === 'Em andamento' ? 'selected' : ''}>Em andamento</option>
+                                    <option value="Concluída" ${a.status === 'Concluída' ? 'selected' : ''}>Concluída</option>
+                                </select>
+                            </td>
+                            <td style="white-space: nowrap;">
+                                <button class="btn btn-primary btn-sm" onclick="abrirEditarPlano('${a.id}')">✏️</button>
+                                <button class="btn btn-secondary btn-sm" onclick="visualizarPlanoAcao('${a.id}')">👁️</button>
+                                <button class="btn btn-danger btn-sm" onclick="excluirAcao('${a.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function abrirEditarPlano(id) {
+    const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+    const plano = acoes.find(a => a.id === id);
+    if (!plano) { showAlert('Plano não encontrado', 'error'); return; }
+    
+    document.getElementById('editarPlanoId').value = plano.id;
+    document.getElementById('editarPlanoTipo').value = plano.tipo || 'Manual';
+    document.getElementById('editarPlanoDescricao').value = plano.descricao || '';
+    document.getElementById('editarPlanoResponsavel').value = plano.responsavel || '';
+    document.getElementById('editarPlanoPrazo').value = plano.prazo || '';
+    document.getElementById('editarPlanoPrioridade').value = plano.prioridade || 'Média';
+    document.getElementById('editarPlanoStatus').value = plano.status || 'Pendente';
+    document.getElementById('editarPlanoRecursos').value = plano.recursos || '';
+    document.getElementById('editarPlanoIndicador').value = plano.indicador || '';
+    
+    const dadosDiv = document.getElementById('editarPlanoDadosAcidente');
+    if (plano.acidenteRef && plano.acidenteRef.nome) {
+        dadosDiv.style.display = 'block';
+        document.getElementById('editarPlanoDadosAcidenteContent').innerHTML = `
+            <p><strong>Acidentado:</strong> ${escapeHtml(plano.acidenteRef.nome)}</p>
+            <p><strong>Data:</strong> ${plano.acidenteRef.data ? formatDate(plano.acidenteRef.data) : 'N/I'}</p>
+            <p><strong>Setor:</strong> ${escapeHtml(plano.acidenteRef.setor || 'N/I')}</p>
+        `;
+    } else {
+        dadosDiv.style.display = 'none';
+    }
+    
+    document.getElementById('modalEditarPlano').classList.add('active');
+}
+
+function salvarEdicaoPlano() {
+    try {
+        const id = document.getElementById('editarPlanoId').value;
+        const descricao = document.getElementById('editarPlanoDescricao').value.trim();
+        const responsavel = document.getElementById('editarPlanoResponsavel').value.trim();
+        const prazo = document.getElementById('editarPlanoPrazo').value;
+        
+        if (!descricao) { showAlert('Descrição é obrigatória', 'error'); return; }
+        if (!responsavel) { showAlert('Responsável é obrigatório', 'error'); return; }
+        if (!prazo) { showAlert('Prazo é obrigatório', 'error'); return; }
+        
+        const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+        
+        if (id) {
+            const index = acoes.findIndex(a => a.id === id);
+            if (index >= 0) {
+                acoes[index] = {
+                    ...acoes[index],
+                    tipo: document.getElementById('editarPlanoTipo').value,
+                    descricao,
+                    responsavel,
+                    prazo,
+                    prioridade: document.getElementById('editarPlanoPrioridade').value,
+                    status: document.getElementById('editarPlanoStatus').value,
+                    recursos: document.getElementById('editarPlanoRecursos').value.trim(),
+                    indicador: document.getElementById('editarPlanoIndicador').value.trim(),
+                    dataAtualizacao: new Date().toISOString()
+                };
+            }
+        } else {
+            const novoPlano = {
+                id: generateId(),
+                tipo: 'Manual',
+                descricao,
+                responsavel,
+                prazo,
+                prioridade: document.getElementById('editarPlanoPrioridade').value,
+                status: document.getElementById('editarPlanoStatus').value,
+                recursos: document.getElementById('editarPlanoRecursos').value.trim(),
+                indicador: document.getElementById('editarPlanoIndicador').value.trim(),
+                origem: 'Manual',
+                dataCriacao: new Date().toISOString(),
+                dataAtualizacao: new Date().toISOString()
+            };
+            acoes.push(novoPlano);
+        }
+        
+        storageSet(STORAGE_KEYS.ACOES, acoes);
+        showAlert('✅ Plano de ação salvo!', 'success');
+        fecharModal('modalEditarPlano');
+        loadPlanosAcao();
+        loadDashboard();
+        
+    } catch (e) {
+        showAlert('❌ Erro: ' + e.message, 'error');
+    }
+}
+
+function atualizarAcao(id, campo, valor) {
+    const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+    const acao = acoes.find(a => a.id === id);
+    if (acao) {
+        if (campo === 'responsavel') {
+            valor = valor.replace(/<[^>]*>/g, '').trim();
+        }
+        acao[campo] = valor;
+        acao.dataAtualizacao = new Date().toISOString();
+        storageSet(STORAGE_KEYS.ACOES, acoes);
+        if (CONFIG.usarGoogleSheets) {
+            googleSheetsSet('acoes', id, acao);
+        }
+    }
+}
+
+function visualizarPlanoAcao(id) {
+    const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+    const plano = acoes.find(a => a.id === id);
+    if (!plano) { showAlert('Plano não encontrado', 'error'); return; }
+    
+    const html = `
+        <div style="padding: 1rem;">
+            <h2 style="color: var(--primary); margin-bottom: 1.5rem;">📋 Detalhes do Plano de Ação</h2>
+            <div class="form-row" style="margin-bottom: 1rem;">
+                <div><strong>Tipo:</strong> ${escapeHtml(plano.tipo || 'Não definido')}</div>
+                <div><strong>Prioridade:</strong> <span class="badge badge-${plano.prioridade === 'Alta' ? 'danger' : plano.prioridade === 'Média' ? 'warning' : 'info'}">${escapeHtml(plano.prioridade || 'Média')}</span></div>
+                <div><strong>Status:</strong> <span class="badge badge-${plano.status === 'Concluída' ? 'success' : 'warning'}">${escapeHtml(plano.status || 'Pendente')}</span></div>
+            </div>
+            ${plano.acidenteRef ? `
+                <div style="background: #fee2e2; padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
+                    <h4 style="color: #991b1b;">🚨 Dados do Acidente</h4>
+                    <p><strong>Acidentado:</strong> ${escapeHtml(plano.acidenteRef.nome || 'N/I')}</p>
+                    <p><strong>Data:</strong> ${plano.acidenteRef.data ? formatDate(plano.acidenteRef.data) : 'N/I'}</p>
+                    <p><strong>Setor:</strong> ${escapeHtml(plano.acidenteRef.setor || 'N/I')}</p>
+                </div>
+            ` : ''}
+            <div class="form-group">
+                <label><strong>Descrição da Ação</strong></label>
+                <p>${escapeHtml(plano.descricao)}</p>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label><strong>Responsável</strong></label><p>${escapeHtml(plano.responsavel || 'Não definido')}</p></div>
+                <div class="form-group"><label><strong>Prazo</strong></label><p>${plano.prazo ? formatDate(plano.prazo) : 'Não definido'}</p></div>
+            </div>
+            ${plano.recursos ? `<div class="form-group"><label><strong>Recursos</strong></label><p>${escapeHtml(plano.recursos)}</p></div>` : ''}
+            ${plano.indicador ? `<div class="form-group"><label><strong>Indicador</strong></label><p>${escapeHtml(plano.indicador)}</p></div>` : ''}
+        </div>
+    `;
+    
+    document.getElementById('visualizarContent').innerHTML = html;
+    document.getElementById('modalVisualizar').classList.add('active');
+}
+
+async function excluirAcao(id) {
+    if (!confirm('Excluir este plano de ação permanentemente?')) return;
+    const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+    storageSet(STORAGE_KEYS.ACOES, acoes.filter(a => a.id !== id));
+    if (CONFIG.usarGoogleSheets) {
+        await googleSheetsDelete('acoes', id);
+    }
+    loadPlanosAcao();
+    showAlert('Plano de ação excluído da nuvem!', 'success');
+}
+
+// ===== FLUXOGRAMA =====
+function initFluxograma() {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const select = document.getElementById('fluxogramaAta');
+    select.innerHTML = '<option value="">Todas as ATAs</option>' + 
+        atas.map(a => `<option value="${a.id}">${formatDate(a.secao1.dataReuniao)} - ${escapeHtml(a.unidade)}</option>`).join('');
+    carregarFluxograma();
+}
+
+function carregarFluxograma() {
+    const ataId = document.getElementById('fluxogramaAta').value;
+    const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+    
+    let tarefas = [];
+    if (ataId) {
+        tarefas = (fluxos[ataId] || []).map((t, i) => ({ ...t, originalIndex: i, ataId }));
+    } else {
+        Object.keys(fluxos).forEach(key => {
+            (fluxos[key] || []).forEach((t, i) => {
+                tarefas.push({ ...t, originalIndex: tarefas.length, ataId: key });
+            });
+        });
+    }
+    
+    renderFluxograma(tarefas);
+}
+
+function renderFluxograma(tarefas) {
+    const container = document.getElementById('fluxogramaContainer');
+    
+    if (tarefas.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Nenhuma tarefa no fluxograma</p></div>';
+        return;
+    }
+    
+    const tarefasPorAta = {};
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    
+    tarefas.forEach(t => {
+        const key = t.ataId || 'sem-ata';
+        if (!tarefasPorAta[key]) tarefasPorAta[key] = [];
+        tarefasPorAta[key].push(t);
+    });
+    
+    let html = '';
+    
+    Object.keys(tarefasPorAta).forEach(ataId => {
+        const grupo = tarefasPorAta[ataId];
+        const ata = atas.find(a => a.id === ataId);
+        
+        if (ata) {
+            html += `
+                <div style="background: white; border: 2px solid var(--primary); border-radius: var(--radius); margin-bottom: 1.5rem; overflow: hidden; box-shadow: var(--shadow-md);">
+                    <div class="group-header" style="background: var(--primary); color: white; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;" onclick="toggleGrupoFluxograma(this)">
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.1rem;">📋 ATA: ${formatDate(ata.secao1.dataReuniao)} - ${escapeHtml(ata.unidade)}</h3>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; opacity: 0.9;">${escapeHtml(ata.secao1.local)} | ${ata.secao1.horaInicio}</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="badge" style="background: rgba(255,255,255,0.3); color: white;">${grupo.length} tarefa${grupo.length > 1 ? 's' : ''}</span>
+                            <span class="toggle-icon" style="font-size: 1.5rem; transition: transform 0.3s;">▼</span>
+                        </div>
+                    </div>
+                    <div class="grupo-tarefas" style="padding: 1rem;">
+                        <div class="flow-container">
+                            ${grupo.map(t => `
+                                <div class="flow-item" style="border: 2px solid ${t.status === 'Concluída' ? 'var(--success)' : t.status === 'Em andamento' ? 'var(--secondary)' : 'var(--warning)'};">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <span style="font-size: 1.2rem;">${t.status === 'Concluída' ? '✅' : t.status === 'Em andamento' ? '🔄' : '⏳'}</span>
+                                                <h4 style="margin: 0;">${escapeHtml(t.descricao || 'Sem descrição')}</h4>
+                                            </div>
+                                            <p style="margin-top: 0.5rem; color: var(--gray-600);">
+                                                <strong>Responsável:</strong> ${escapeHtml(t.responsavel || 'Não definido')} | 
+                                                <strong>Prazo:</strong> ${t.prazo ? formatDate(t.prazo) : 'Não definido'}
+                                                ${t.status ? ` | <strong>Status:</strong> <span style="color: ${t.status === 'Concluída' ? 'var(--success)' : t.status === 'Em andamento' ? 'var(--primary)' : 'var(--warning)'};">${escapeHtml(t.status)}</span>` : ''}
+                                            </p>
+                                        </div>
+                                        <div style="display: flex; gap: 0.25rem;">
+                                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); editarTarefaFluxo('${t.ataId}', ${t.originalIndex})">✏️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); excluirTarefaFluxo('${t.ataId}', ${t.originalIndex})">✕</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    container.innerHTML = html;
+}
+
+function adicionarTarefaFluxo() {
+    const ataId = document.getElementById('fluxogramaAta').value;
+    
+    const descricao = prompt('Descrição da tarefa:');
+    if (!descricao) return;
+    
+    const responsavel = prompt('Responsável:') || '';
+    const prazo = prompt('Prazo (AAAA-MM-DD):') || '';
+    const status = prompt('Status (Pendente, Em andamento, Concluída):') || 'Pendente';
+    
+    const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+    const chave = ataId || 'sem-ata';
+    
+    if (!fluxos[chave]) fluxos[chave] = [];
+    
+    fluxos[chave].push({
+        id: generateId(),
+        descricao,
+        responsavel,
+        prazo,
+        status,
+        ataId: ataId || 'sem-ata'
+    });
+    
+    storageSet(STORAGE_KEYS.FLUXOGRAMAS, fluxos);
+    if (CONFIG.usarGoogleSheets && ataId) {
+        googleSheetsSet('fluxogramas', ataId, fluxos[chave]);
+    }
+    
+    carregarFluxograma();
+    showAlert('✅ Tarefa adicionada!', 'success');
+}
+
+function editarTarefaFluxo(ataId, index) {
+    const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+    const tarefas = fluxos[ataId] || [];
+    
+    if (!tarefas[index]) { showAlert('Tarefa não encontrada', 'error'); return; }
+    
+    const tarefa = tarefas[index];
+    const novaDescricao = prompt('Descrição:', tarefa.descricao);
+    if (novaDescricao === null) return;
+    const novoResponsavel = prompt('Responsável:', tarefa.responsavel);
+    if (novoResponsavel === null) return;
+    const novoPrazo = prompt('Prazo:', tarefa.prazo);
+    if (novoPrazo === null) return;
+    const novoStatus = prompt('Status:', tarefa.status || 'Pendente');
+    if (novoStatus === null) return;
+    
+    tarefas[index] = {
+        ...tarefa,
+        descricao: novaDescricao || tarefa.descricao,
+        responsavel: novoResponsavel,
+        prazo: novoPrazo,
+        status: novoStatus || 'Pendente'
+    };
+    
+    fluxos[ataId] = tarefas;
+    storageSet(STORAGE_KEYS.FLUXOGRAMAS, fluxos);
+    if (CONFIG.usarGoogleSheets) {
+        googleSheetsSet('fluxogramas', ataId, tarefas);
+    }
+    carregarFluxograma();
+    showAlert('Tarefa atualizada!', 'success');
+}
+
+async function excluirTarefaFluxo(ataId, index) {
+    if (!confirm('Excluir esta tarefa permanentemente?')) return;
+    
+    const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+    if (fluxos[ataId]) {
+        fluxos[ataId].splice(index, 1);
+        if (fluxos[ataId].length === 0) {
+            delete fluxos[ataId];
+            if (CONFIG.usarGoogleSheets) {
+                await googleSheetsDelete('fluxogramas', ataId);
+            }
+        } else {
+            if (CONFIG.usarGoogleSheets) {
+                await googleSheetsSet('fluxogramas', ataId, fluxos[ataId]);
+            }
+        }
+        storageSet(STORAGE_KEYS.FLUXOGRAMAS, fluxos);
+    }
+    carregarFluxograma();
+    setTimeout(() => carregarFluxograma(), 300);
+    showAlert('Tarefa excluída da nuvem!', 'success');
+}
+
+function toggleGrupoFluxograma(header) {
+    const grupo = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+    if (grupo.style.display === 'none') {
+        grupo.style.display = 'block';
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        grupo.style.display = 'none';
+        icon.style.transform = 'rotate(-90deg)';
+    }
+}
+
+// ===== DASHBOARD =====
+function loadDashboard() {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const acoes = storageGet(STORAGE_KEYS.ACOES) || [];
+    const demandas = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+    
+    document.getElementById('statAtas').textContent = atas.length;
+    document.getElementById('statAcoes').textContent = acoes.filter(a => a.status !== 'Concluída').length;
+    document.getElementById('statAcidentes').textContent = atas.reduce((sum, a) => sum + (a.secao4.acidentes?.length || 0), 0);
+    
+    const mesAtual = new Date().toISOString().substr(0, 7);
+    document.getElementById('statMes').textContent = atas.filter(a => a.secao1.dataReuniao.startsWith(mesAtual)).length;
+    
+    document.getElementById('statDemandasTotal').textContent = demandas.length;
+    document.getElementById('statDemandasPendentes').textContent = demandas.filter(d => d.status === 'Pendente').length;
+    document.getElementById('statDemandasAndamento').textContent = demandas.filter(d => d.status === 'Em andamento').length;
+    document.getElementById('statDemandasConcluidas').textContent = demandas.filter(d => d.status === 'Concluído').length;
+    
+    const ultimasAtas = atas.sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
+    const container = document.getElementById('dashboardAtasList');
+    
+    if (ultimasAtas.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Nenhuma ATA registrada</p></div>';
+        return;
+    }
+    
+    container.innerHTML = ultimasAtas.map(ata => `
+        <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>${formatDate(ata.secao1.dataReuniao)} - ${escapeHtml(ata.unidade)}</strong>
+                <p style="color: var(--gray-500); font-size: 0.875rem; margin-top: 0.25rem;">
+                    ${ata.secao6.acoes.length} ações | ${ata.secao4.acidentes.length} acidentes
+                </p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="visualizarAta('${ata.id}')">Ver</button>
+        </div>
+    `).join('');
+}
+
+// ===== EXPORT/IMPORT =====
+function exportData() {
+    const data = {
+        config: storageGet(STORAGE_KEYS.CONFIG),
+        atas: storageGet(STORAGE_KEYS.ATAS),
+        acoes: storageGet(STORAGE_KEYS.ACOES),
+        fluxogramas: storageGet(STORAGE_KEYS.FLUXOGRAMAS),
+        camposCustom: storageGet(STORAGE_KEYS.CAMPOS_CUSTOM),
+        demandas: storageGet(STORAGE_KEYS.DEMANDAS),
+        baseConhecimento: storageGet(STORAGE_KEYS.BASE_CONHECIMENTO),
+        exportDate: new Date().toISOString(),
+        version: '2.0'
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cipa_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showAlert('Backup exportado com sucesso!', 'success');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (!confirm('Importar backup? Isso irá mesclar com os dados atuais.')) return;
+            
+            if (data.config) {
+                const configAtual = storageGet(STORAGE_KEYS.CONFIG) || {};
+                storageSet(STORAGE_KEYS.CONFIG, { ...configAtual, ...data.config });
+            }
+            if (data.atas) {
+                const atasAtuais = storageGet(STORAGE_KEYS.ATAS) || [];
+                const atasMap = new Map();
+                atasAtuais.forEach(a => atasMap.set(a.id, a));
+                data.atas.forEach(a => atasMap.set(a.id, a));
+                storageSet(STORAGE_KEYS.ATAS, Array.from(atasMap.values()));
+            }
+            if (data.acoes) {
+                const acoesAtuais = storageGet(STORAGE_KEYS.ACOES) || [];
+                const acoesMap = new Map();
+                acoesAtuais.forEach(a => acoesMap.set(a.id, a));
+                data.acoes.forEach(a => acoesMap.set(a.id, a));
+                storageSet(STORAGE_KEYS.ACOES, Array.from(acoesMap.values()));
+            }
+            if (data.fluxogramas) storageSet(STORAGE_KEYS.FLUXOGRAMAS, data.fluxogramas);
+            if (data.camposCustom) storageSet(STORAGE_KEYS.CAMPOS_CUSTOM, data.camposCustom);
+            if (data.demandas) storageSet(STORAGE_KEYS.DEMANDAS, data.demandas);
+            if (data.baseConhecimento) storageSet(STORAGE_KEYS.BASE_CONHECIMENTO, data.baseConhecimento);
+            
+            showAlert('Backup importado! Recarregando...', 'success');
+            setTimeout(() => location.reload(), 1500);
+            
+        } catch (e) {
+            showAlert('Erro ao importar: arquivo inválido', 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
+// ===== UTILITIES =====
+function formatDate(dateStr) {
+    if (!dateStr) return 'N/I';
+    const date = new Date(dateStr + 'T00:00:00');
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('pt-BR');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ===== BASE DE CONHECIMENTO =====
+function carregarBaseConhecimento() {
+    carregarListaArtigos();
+}
+
+function abrirNovoArtigo() {
+    document.getElementById('artigoId').value = '';
+    document.getElementById('modalArtigoTitulo').textContent = 'Novo Artigo';
+    document.getElementById('artigoCategoria').value = '';
+    document.getElementById('artigoStatus').value = 'Ativo';
+    document.getElementById('artigoTitulo').value = '';
+    document.getElementById('artigoOrigem').value = '';
+    document.getElementById('artigoData').value = new Date().toISOString().split('T')[0];
+    document.getElementById('artigoPergunta').value = '';
+    document.getElementById('artigoAnalise').value = '';
+    document.getElementById('artigoResposta').value = '';
+    document.getElementById('artigoFundamentacao').value = '';
+    document.getElementById('artigoTags').value = '';
+    document.getElementById('artigoObservacoes').value = '';
+    document.getElementById('modalArtigo').classList.add('active');
+}
+
+function editarArtigo(id) {
+    const artigos = storageGet(STORAGE_KEYS.BASE_CONHECIMENTO) || [];
+    const artigo = artigos.find(a => a.id === id);
+    if (!artigo) { showAlert('Artigo não encontrado', 'error'); return; }
+    
+    document.getElementById('artigoId').value = artigo.id;
+    document.getElementById('artigoCategoria').value = artigo.categoria || '';
+    document.getElementById('artigoStatus').value = artigo.status || 'Ativo';
+    document.getElementById('artigoTitulo').value = artigo.titulo || '';
+    document.getElementById('artigoOrigem').value = artigo.origem || '';
+    document.getElementById('artigoData').value = artigo.data || '';
+    document.getElementById('artigoPergunta').value = artigo.pergunta || '';
+    document.getElementById('artigoAnalise').value = artigo.analise || '';
+    document.getElementById('artigoResposta').value = artigo.resposta || '';
+    document.getElementById('artigoFundamentacao').value = artigo.fundamentacao || '';
+    document.getElementById('artigoTags').value = artigo.tags || '';
+    document.getElementById('artigoObservacoes').value = artigo.observacoes || '';
+    document.getElementById('modalArtigo').classList.add('active');
+}
+
+function salvarArtigo() {
+    try {
+        const categoria = document.getElementById('artigoCategoria').value;
+        const titulo = document.getElementById('artigoTitulo').value.trim();
+        const pergunta = document.getElementById('artigoPergunta').value.trim();
+        const resposta = document.getElementById('artigoResposta').value.trim();
+        
+        if (!categoria) { showAlert('Selecione a categoria', 'error'); return; }
+        if (!titulo) { showAlert('Informe o título', 'error'); return; }
+        if (!pergunta) { showAlert('Informe a pergunta', 'error'); return; }
+        if (!resposta) { showAlert('Informe a resposta', 'error'); return; }
+        
+        const artigos = storageGet(STORAGE_KEYS.BASE_CONHECIMENTO) || [];
+        const artigoId = document.getElementById('artigoId').value;
+        
+        const artigoData = {
+            categoria,
+            status: document.getElementById('artigoStatus').value,
+            titulo,
+            origem: document.getElementById('artigoOrigem').value.trim(),
+            data: document.getElementById('artigoData').value,
+            pergunta,
+            analise: document.getElementById('artigoAnalise').value.trim(),
+            resposta,
+            fundamentacao: document.getElementById('artigoFundamentacao').value.trim(),
+            tags: document.getElementById('artigoTags').value.trim(),
+            observacoes: document.getElementById('artigoObservacoes').value.trim(),
+            dataCriacao: new Date().toISOString(),
+            dataAtualizacao: new Date().toISOString()
+        };
+        
+        if (artigoId) {
+            const index = artigos.findIndex(a => a.id === artigoId);
+            if (index >= 0) {
+                artigoData.id = artigoId;
+                artigoData.dataCriacao = artigos[index].dataCriacao;
+                artigos[index] = artigoData;
+            }
+        } else {
+            artigoData.id = generateId();
+            artigos.push(artigoData);
+        }
+        
+        storageSet(STORAGE_KEYS.BASE_CONHECIMENTO, artigos);
+        if (CONFIG.usarGoogleSheets) {
+            googleSheetsSet('base_conhecimento', artigoData.id, artigoData);
+        }
+        
+        showAlert('Artigo salvo!', 'success');
+        fecharModal('modalArtigo');
+        carregarListaArtigos();
+        
+    } catch (e) {
+        showAlert('Erro: ' + e.message, 'error');
+    }
+}
+
+function filtrarArtigos() { carregarListaArtigos(); }
+
+function carregarListaArtigos() {
+    const artigos = storageGet(STORAGE_KEYS.BASE_CONHECIMENTO) || [];
+    const container = document.getElementById('listaArtigos');
+    
+    const busca = (document.getElementById('buscaConhecimento')?.value || '').toLowerCase();
+    const filtroCat = document.getElementById('filtroCategoria')?.value || '';
+    const filtroStatus = document.getElementById('filtroStatusConhecimento')?.value || '';
+    
+    let filtrados = [...artigos];
+    
+    if (busca) {
+        filtrados = filtrados.filter(a => 
+            a.titulo.toLowerCase().includes(busca) ||
+            (a.tags || '').toLowerCase().includes(busca) ||
+            (a.pergunta || '').toLowerCase().includes(busca)
+        );
+    }
+    if (filtroCat) filtrados = filtrados.filter(a => a.categoria === filtroCat);
+    if (filtroStatus) filtrados = filtrados.filter(a => a.status === filtroStatus);
+    
+    filtrados.sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+    
+    if (filtrados.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📚</div><p>Nenhum artigo encontrado</p></div>`;
+        return;
+    }
+    
+    const statusColors = { 'Ativo': 'success', 'Revisão Pendente': 'warning', 'Arquivado': 'danger' };
+    
+    container.innerHTML = `
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Título</th><th>Categoria</th><th>Data</th><th>Origem</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody>
+                    ${filtrados.map(a => `
+                        <tr>
+                            <td><strong>${escapeHtml(a.titulo)}</strong>${a.tags ? `<br><small>🏷️ ${escapeHtml(a.tags)}</small>` : ''}</td>
+                            <td><span class="badge badge-info">${escapeHtml(a.categoria || 'N/I')}</span></td>
+                            <td>${a.data ? formatDate(a.data) : 'N/I'}</td>
+                            <td>${escapeHtml(a.origem || 'N/I')}</td>
+                            <td><span class="badge badge-${statusColors[a.status] || 'info'}">${escapeHtml(a.status || 'Ativo')}</span></td>
+                            <td style="white-space: nowrap;">
+                                <button class="btn btn-primary btn-sm" onclick="visualizarArtigo('${a.id}')">👁️</button>
+                                <button class="btn btn-secondary btn-sm" onclick="editarArtigo('${a.id}')">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="excluirArtigo('${a.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function visualizarArtigo(id) {
+    const artigos = storageGet(STORAGE_KEYS.BASE_CONHECIMENTO) || [];
+    const artigo = artigos.find(a => a.id === id);
+    if (!artigo) { showAlert('Artigo não encontrado', 'error'); return; }
+    
+    const html = `
+        <div style="padding: 2rem;">
+            <h2 style="color: var(--primary);">📚 ${escapeHtml(artigo.titulo)}</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+                <div><strong>Categoria:</strong> <span class="badge badge-info">${escapeHtml(artigo.categoria || 'N/I')}</span></div>
+                <div><strong>Status:</strong> ${escapeHtml(artigo.status || 'Ativo')}</div>
+                <div><strong>Data:</strong> ${artigo.data ? formatDate(artigo.data) : 'N/I'}</div>
+                <div><strong>Origem:</strong> ${escapeHtml(artigo.origem || 'N/I')}</div>
+            </div>
+            <div style="background: #fef3c7; padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1rem; border-left: 4px solid var(--warning);">
+                <h3>❓ Pergunta</h3><p>${escapeHtml(artigo.pergunta)}</p>
+            </div>
+            ${artigo.analise ? `<div style="background: #dbeafe; padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1rem; border-left: 4px solid var(--primary);"><h3>🔍 Análise</h3><p>${escapeHtml(artigo.analise)}</p></div>` : ''}
+            <div style="background: #dcfce7; padding: 1.5rem; border-radius: var(--radius); border-left: 4px solid var(--success);">
+                <h3>✅ Resposta</h3><p>${escapeHtml(artigo.resposta)}</p>
+            </div>
+            ${artigo.fundamentacao ? `<div style="margin-top: 1rem; padding: 1rem; background: var(--gray-50); border-radius: var(--radius);"><strong>📖 Fundamentação:</strong><p>${escapeHtml(artigo.fundamentacao)}</p></div>` : ''}
+        </div>
+    `;
+    
+    document.getElementById('visualizarContent').innerHTML = html;
+    document.getElementById('modalVisualizar').classList.add('active');
+}
+
+async function excluirArtigo(id) {
+    if (!confirm('Excluir este artigo?')) return;
+    const artigos = storageGet(STORAGE_KEYS.BASE_CONHECIMENTO) || [];
+    storageSet(STORAGE_KEYS.BASE_CONHECIMENTO, artigos.filter(a => a.id !== id));
+    if (CONFIG.usarGoogleSheets) {
+        await googleSheetsDelete('base_conhecimento', id);
+    }
+    carregarListaArtigos();
+    showAlert('Artigo excluído!', 'success');
+}
+
+// ===== GESTÃO DE DEMANDAS =====
+function carregarGestaoDemandas() {
+    carregarFiltrosSetores();
+    carregarListaDemandas();
+}
+
+function carregarFiltrosSetores() {
+    const config = storageGet(STORAGE_KEYS.CONFIG) || { setores: [] };
+    const select = document.getElementById('filtroSetor');
+    select.innerHTML = '<option value="">Todos os Setores</option>' + 
+        config.setores.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+}
+
+function carregarSetoresModal() {
+    const config = storageGet(STORAGE_KEYS.CONFIG) || { setores: [] };
+    const select = document.getElementById('demandaSetor');
+    select.innerHTML = '<option value="">Selecione o Setor</option>' + 
+        config.setores.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+}
+
+function abrirNovaDemanda() {
+    document.getElementById('demandaId').value = '';
+    document.getElementById('modalDemandaTitulo').textContent = 'Nova Demanda';
+    document.getElementById('demandaDescricao').value = '';
+    document.getElementById('demandaOrigem').value = '';
+    document.getElementById('demandaOutraOrigem').value = '';
+    document.getElementById('demandaSolicitante').value = '';
+    document.getElementById('demandaResponsavel').value = '';
+    document.getElementById('demandaPrazo').value = '';
+    document.getElementById('demandaPrioridade').value = 'Média';
+    document.getElementById('demandaStatus').value = 'Pendente';
+    document.getElementById('demandaConclusao').value = '';
+    document.getElementById('demandaObservacoes').value = '';
+    document.getElementById('grupoOutraOrigem').style.display = 'none';
+    carregarSetoresModal();
+    document.getElementById('modalDemanda').classList.add('active');
+}
+
+function fecharModalDemanda() {
+    document.getElementById('modalDemanda').classList.remove('active');
+}
+
+function salvarDemanda() {
+    try {
+        const setor = document.getElementById('demandaSetor').value;
+        const descricao = document.getElementById('demandaDescricao').value.trim();
+        const origem = document.getElementById('demandaOrigem').value;
+        const outraOrigem = document.getElementById('demandaOutraOrigem').value.trim();
+        const solicitante = document.getElementById('demandaSolicitante').value.trim();
+        const prazo = document.getElementById('demandaPrazo').value;
+        
+        if (!setor) { showAlert('Selecione o setor', 'error'); return; }
+        if (!descricao) { showAlert('Descreva a demanda', 'error'); return; }
+        if (!origem) { showAlert('Selecione a origem', 'error'); return; }
+        if (origem === 'Outro' && !outraOrigem) { showAlert('Especifique a origem', 'error'); return; }
+        if (!solicitante) { showAlert('Informe o solicitante', 'error'); return; }
+        if (!prazo) { showAlert('Informe o prazo', 'error'); return; }
+        
+        const demandas = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+        const demandaId = document.getElementById('demandaId').value;
+        
+        const demandaData = {
+            setor,
+            descricao,
+            origem: origem === 'Outro' ? `Outro: ${outraOrigem}` : origem,
+            solicitante,
+            responsavel: document.getElementById('demandaResponsavel').value.trim(),
+            prazo,
+            prioridade: document.getElementById('demandaPrioridade').value,
+            status: document.getElementById('demandaStatus').value,
+            conclusao: document.getElementById('demandaConclusao').value.trim(),
+            observacoes: document.getElementById('demandaObservacoes').value.trim(),
+            dataCriacao: new Date().toISOString(),
+            dataAtualizacao: new Date().toISOString()
+        };
+        
+        if (demandaId) {
+            const index = demandas.findIndex(d => d.id === demandaId);
+            if (index >= 0) {
+                demandaData.id = demandaId;
+                demandaData.dataCriacao = demandas[index].dataCriacao;
+                demandas[index] = demandaData;
+            }
+        } else {
+            demandaData.id = generateId();
+            demandas.push(demandaData);
+        }
+        
+        storageSet(STORAGE_KEYS.DEMANDAS, demandas);
+        if (CONFIG.usarGoogleSheets) {
+            googleSheetsSet('demandas', demandaData.id, demandaData);
+        }
+        
+        showAlert('Demanda salva!', 'success');
+        fecharModalDemanda();
+        carregarListaDemandas();
+        
+    } catch (e) {
+        showAlert('Erro: ' + e.message, 'error');
+    }
+}
+
+function filtrarDemandas() { carregarListaDemandas(); }
+
+function carregarListaDemandas() {
+    const demandas = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+    const container = document.getElementById('listaDemandas');
+    
+    const filtroSetor = document.getElementById('filtroSetor')?.value || '';
+    const filtroStatus = document.getElementById('filtroStatus')?.value || '';
+    const filtroPrioridade = document.getElementById('filtroPrioridade')?.value || '';
+    
+    let filtradas = [...demandas];
+    
+    if (filtroSetor) filtradas = filtradas.filter(d => d.setor === filtroSetor);
+    if (filtroStatus) filtradas = filtradas.filter(d => d.status === filtroStatus);
+    if (filtroPrioridade) filtradas = filtradas.filter(d => d.prioridade === filtroPrioridade);
+    
+    filtradas.sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+    
+    if (filtradas.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><p>Nenhuma demanda encontrada</p></div>`;
+        return;
+    }
+    
+    const statusColors = { 'Pendente': 'warning', 'Em andamento': 'info', 'Concluído': 'success', 'Indeferido': 'danger' };
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    container.innerHTML = `
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Setor</th><th>Demanda</th><th>Origem</th><th>Solicitante</th><th>Prazo</th><th>Prioridade</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody>
+                    ${filtradas.map(d => {
+                        const prazoDate = new Date(d.prazo + 'T00:00:00');
+                        const diasRestantes = Math.ceil((prazoDate - hoje) / (1000 * 60 * 60 * 24));
+                        const vencido = diasRestantes < 0 && d.status !== 'Concluído' && d.status !== 'Indeferido';
+                        
+                        return `
+                        <tr style="${d.prioridade === 'Alta' ? 'background: #fef2f2;' : ''}${vencido ? 'border-left: 4px solid var(--danger);' : ''}">
+                            <td><span class="badge badge-info">${escapeHtml(d.setor)}</span></td>
+                            <td><strong>${escapeHtml(d.descricao || '')}</strong>${d.responsavel ? `<br><small>Resp: ${escapeHtml(d.responsavel)}</small>` : ''}</td>
+                            <td>${escapeHtml(d.origem || 'N/I')}</td>
+                            <td>${escapeHtml(d.solicitante)}</td>
+                            <td><span style="${vencido ? 'color: var(--danger); font-weight: bold;' : ''}">${formatDate(d.prazo)}${d.status !== 'Concluído' && d.status !== 'Indeferido' ? `<br><small>(${diasRestantes >= 0 ? diasRestantes + ' dias' : 'Vencido!'})</small>` : ''}</span></td>
+                            <td><span class="badge badge-${d.prioridade === 'Alta' ? 'danger' : d.prioridade === 'Média' ? 'warning' : 'info'}">${escapeHtml(d.prioridade)}</span></td>
+                            <td><span class="badge badge-${statusColors[d.status] || 'info'}">${escapeHtml(d.status)}</span></td>
+                            <td style="white-space: nowrap;">
+                                <button class="btn btn-secondary btn-sm" onclick="editarDemanda('${d.id}')">✏️</button>
+                                <button class="btn btn-primary btn-sm" onclick="visualizarDemanda('${d.id}')">👁️</button>
+                                <button class="btn btn-danger btn-sm" onclick="excluirDemanda('${d.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `}).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function editarDemanda(id) {
+    const demandas = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+    const d = demandas.find(x => x.id === id);
+    if (!d) { showAlert('Demanda não encontrada', 'error'); return; }
+    
+    document.getElementById('demandaId').value = d.id;
+    document.getElementById('modalDemandaTitulo').textContent = 'Editar Demanda';
+    carregarSetoresModal();
+    
+    setTimeout(() => {
+        document.getElementById('demandaSetor').value = d.setor || '';
+        document.getElementById('demandaDescricao').value = d.descricao || '';
+        document.getElementById('demandaOrigem').value = (d.origem && d.origem.startsWith('Outro:')) ? 'Outro' : (d.origem || '');
+        document.getElementById('demandaOutraOrigem').value = (d.origem && d.origem.startsWith('Outro:')) ? d.origem.replace('Outro:', '').trim() : '';
+        document.getElementById('demandaSolicitante').value = d.solicitante || '';
+        document.getElementById('demandaResponsavel').value = d.responsavel || '';
+        document.getElementById('demandaPrazo').value = d.prazo || '';
+        document.getElementById('demandaPrioridade').value = d.prioridade || 'Média';
+        document.getElementById('demandaStatus').value = d.status || 'Pendente';
+        document.getElementById('demandaConclusao').value = d.conclusao || '';
+        document.getElementById('demandaObservacoes').value = d.observacoes || '';
+        document.getElementById('grupoOutraOrigem').style.display = (d.origem && d.origem.startsWith('Outro:')) ? 'block' : 'none';
+    }, 100);
+    
+    document.getElementById('modalDemanda').classList.add('active');
+}
+
+function visualizarDemanda(id) {
+    const demandas = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+    const d = demandas.find(x => x.id === id);
+    if (!d) { showAlert('Demanda não encontrada', 'error'); return; }
+    
+    const html = `
+        <div style="padding: 2rem;">
+            <h2 style="color: var(--primary);">📝 Detalhes da Demanda</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+                <div><strong>Setor:</strong> <span class="badge badge-info">${escapeHtml(d.setor)}</span></div>
+                <div><strong>Status:</strong> ${escapeHtml(d.status)}</div>
+                <div><strong>Prioridade:</strong> ${escapeHtml(d.prioridade)}</div>
+                <div><strong>Prazo:</strong> ${formatDate(d.prazo)}</div>
+                <div><strong>Solicitante:</strong> ${escapeHtml(d.solicitante)}</div>
+                <div><strong>Responsável:</strong> ${escapeHtml(d.responsavel || 'N/D')}</div>
+                <div><strong>Origem:</strong> ${escapeHtml(d.origem)}</div>
+            </div>
+            <div style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                <strong>Descrição:</strong><p>${escapeHtml(d.descricao)}</p>
+            </div>
+            ${d.conclusao ? `<div style="background: #dcfce7; padding: 1rem; border-radius: var(--radius);"><strong>Conclusão:</strong><p>${escapeHtml(d.conclusao)}</p></div>` : ''}
+        </div>
+    `;
+    
+    document.getElementById('visualizarContent').innerHTML = html;
+    document.getElementById('modalVisualizar').classList.add('active');
+}
+
+async function excluirDemanda(id) {
+    if (!confirm('Excluir esta demanda?')) return;
+    const demandas = storageGet(STORAGE_KEYS.DEMANDAS) || [];
+    storageSet(STORAGE_KEYS.DEMANDAS, demandas.filter(d => d.id !== id));
+    if (CONFIG.usarGoogleSheets) {
+        await googleSheetsDelete('demandas', id);
+    }
+    carregarListaDemandas();
+    showAlert('Demanda excluída!', 'success');
+}
+
+// ===== BLOQUEIO DE ATA =====
+function alterarStatusAta(ataId, novoStatus) {
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const ata = atas.find(a => a.id === ataId);
+    if (!ata) return;
+    
+    if (novoStatus === 'Finalizada' && ata.status !== 'Finalizada') {
+        const senha = prompt('🔒 Para FINALIZAR esta ATA, digite a senha:');
+        if (senha !== CONFIG.senhaBloqueio) {
+            showAlert('❌ Senha incorreta!', 'error');
+            loadAtasSalvas();
+            return;
+        }
+        if (!confirm('⚠️ Ao finalizar, a ATA será BLOQUEADA. Continuar?')) {
+            loadAtasSalvas();
+            return;
+        }
+        ata.status = novoStatus;
+        ata.bloqueada = true;
+        ata.dataAtualizacao = new Date().toISOString();
+        storageSet(STORAGE_KEYS.ATAS, atas);
+        if (CONFIG.usarGoogleSheets) googleSheetsSet('atas', ataId, ata);
+        loadAtasSalvas();
+        showAlert('🔒 ATA finalizada e bloqueada!', 'success');
+        return;
+    }
+    
+    if (ata.bloqueada && novoStatus !== 'Finalizada') {
+        const senha = prompt('🔓 Para DESBLOQUEAR esta ATA, digite a senha:');
+        if (senha !== CONFIG.senhaBloqueio) {
+            showAlert('❌ Senha incorreta!', 'error');
+            loadAtasSalvas();
+            return;
+        }
+        ata.status = novoStatus;
+        ata.bloqueada = false;
+        ata.dataAtualizacao = new Date().toISOString();
+        storageSet(STORAGE_KEYS.ATAS, atas);
+        if (CONFIG.usarGoogleSheets) googleSheetsSet('atas', ataId, ata);
+        loadAtasSalvas();
+        showAlert('🔓 ATA desbloqueada!', 'success');
+        return;
+    }
+    
+    if (!ata.bloqueada) {
+        ata.status = novoStatus;
+        ata.dataAtualizacao = new Date().toISOString();
+        storageSet(STORAGE_KEYS.ATAS, atas);
+        if (CONFIG.usarGoogleSheets) googleSheetsSet('atas', ataId, ata);
+        showAlert(`✅ Status alterado para "${novoStatus}"`, 'success');
+    }
+}
+
+function desbloquearAta(ataId) {
+    const senha = prompt('🔓 Digite a senha para DESBLOQUEAR:');
+    if (senha !== CONFIG.senhaBloqueio) {
+        showAlert('❌ Senha incorreta!', 'error');
+        return;
+    }
+    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+    const ata = atas.find(a => a.id === ataId);
+    if (ata) {
+        ata.bloqueada = false;
+        ata.dataAtualizacao = new Date().toISOString();
+        storageSet(STORAGE_KEYS.ATAS, atas);
+        if (CONFIG.usarGoogleSheets) googleSheetsSet('atas', ataId, ata);
+        loadAtasSalvas();
+        showAlert('🔓 ATA desbloqueada!', 'success');
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const origemSelect = document.getElementById('demandaOrigem');
+    if (origemSelect) {
+        origemSelect.addEventListener('change', function() {
+            document.getElementById('grupoOutraOrigem').style.display = this.value === 'Outro' ? 'block' : 'none';
+        });
+    }
+    
+    // Double-click no botão de sincronização também baixa dados
+    document.getElementById('btnSync').addEventListener('dblclick', function(e) {
+        e.preventDefault();
+        downloadFromCloud();
+    });
+});
+
+// Inicializar
+renderCustomFields();
+</script>
+</body>
+</html>
