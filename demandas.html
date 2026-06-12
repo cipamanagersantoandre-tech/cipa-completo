@@ -845,7 +845,7 @@
                                     <td>${plano.responsavel || 'Não definido'}</td>
                                     <td>
                                         <span style="${prazoVencido ? 'color: var(--danger); font-weight: bold;' : ''}">
-                                            ${plano.prazo ? formatarData(plano.prazo) : 'Não definido'}
+                                            ${plano.prazo ? formatDate(plano.prazo) : 'Não definido'}
                                             ${prazoVencido ? '<br><small>⚠️ Vencido!</small>' : ''}
                                         </span>
                                     </td>
@@ -924,7 +924,7 @@
                         <p><strong>Tipo:</strong> <span class="badge badge-info">${plano.tipo || 'Manual'}</span></p>
                         <p><strong>Status:</strong> <span class="badge badge-${plano.status === 'Concluída' ? 'success' : plano.status === 'Em andamento' ? 'info' : 'warning'}">${plano.status || 'Pendente'}</span></p>
                         <p><strong>Prioridade:</strong> <span class="badge badge-${plano.prioridade === 'Alta' ? 'danger' : plano.prioridade === 'Média' ? 'warning' : 'info'}">${plano.prioridade || 'Média'}</span></p>
-                        <p><strong>Prazo:</strong> ${plano.prazo ? formatarData(plano.prazo) : 'Não definido'}</p>
+                        <p><strong>Prazo:</strong> ${plano.prazo ? formatDate(plano.prazo) : 'Não definido'}</p>
                         <p><strong>Responsável:</strong> ${plano.responsavel || 'Não definido'}</p>
                         <p><strong>Criado em:</strong> ${plano.dataCriacao ? new Date(plano.dataCriacao).toLocaleString('pt-BR') : 'N/I'}</p>
                     </div>
@@ -934,7 +934,7 @@
                     <div class="detail-section" style="background: #fee2e2;">
                         <h4>🚨 Acidente Relacionado</h4>
                         <p><strong>Acidentado:</strong> ${plano.acidenteRef.nome || 'N/I'}</p>
-                        <p><strong>Data:</strong> ${plano.acidenteRef.data ? formatarData(plano.acidenteRef.data) : 'N/I'}</p>
+                        <p><strong>Data:</strong> ${plano.acidenteRef.data ? formatDate(plano.acidenteRef.data) : 'N/I'}</p>
                         <p><strong>Setor:</strong> ${plano.acidenteRef.setor || 'N/I'}</p>
                     </div>
                 ` : ''}
