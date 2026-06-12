@@ -515,10 +515,11 @@
         </header>
 
         <!-- Navegação -->
-        <nav>
-            <button class="nav-btn active" onclick="showSection('demandas', this)">📝 Demandas</button>
-            <button class="nav-btn" onclick="showSection('fluxograma', this)">📈 Fluxograma</button>
-        </nav>
+<nav>
+    <button class="nav-btn active" onclick="showSection('demandas', this)">📝 Demandas</button>
+    <button class="nav-btn" onclick="showSection('fluxograma', this)">📈 Fluxograma</button>
+    <button class="nav-btn" onclick="showSection('planos', this)">✓ Planos de Ação</button>
+</nav>
 
         <div id="alertContainer"></div>
 
@@ -591,6 +592,62 @@
             </div>
         </div>
 
+        <!-- SEÇÃO DE PLANOS DE AÇÃO -->
+        <div id="planos" class="section">
+            <!-- Estatísticas -->
+            <div class="stats-grid" id="statsPlanos"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">✓ Planos de Ação</h2>
+                    <button class="btn btn-primary btn-sm" onclick="carregarPlanos()">
+                        🔄 Atualizar
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>🔍 Buscar</label>
+                        <input type="text" id="searchPlano" placeholder="Pesquisar planos..." onkeyup="filtrarPlanos()">
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="filterPlanoStatus" onchange="filtrarPlanos()">
+                            <option value="">Todos os Status</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em andamento">Em andamento</option>
+                            <option value="Concluída">Concluída</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Prioridade</label>
+                        <select id="filterPlanoPrioridade" onchange="filtrarPlanos()">
+                            <option value="">Todas</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Média">Média</option>
+                            <option value="Baixa">Baixa</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Tipo</label>
+                        <select id="filterPlanoTipo" onchange="filtrarPlanos()">
+                            <option value="">Todos os Tipos</option>
+                            <option value="Corretiva">Corretiva</option>
+                            <option value="Preventiva">Preventiva</option>
+                            <option value="Investigação">Investigação</option>
+                            <option value="Treinamento">Treinamento</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Planos -->
+                <div id="planosList"></div>
+            </div>
+        </div>
+
         <!-- Modal de Detalhes -->
         <div id="detailModal" class="modal">
             <div class="modal-content">
@@ -616,16 +673,15 @@
 
         // ===== NAVEGAÇÃO POR ABAS =====
         function showSection(sectionId, btn) {
-            // Atualizar abas
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById(sectionId).classList.add('active');
             if (btn) btn.classList.add('active');
             
-            // Carregar dados da aba
             if (sectionId === 'demandas') carregarDemandas();
             if (sectionId === 'fluxograma') carregarFluxograma();
+            if (sectionId === 'planos') carregarPlanos();
         }
 
         // ===== ALERTAS =====
@@ -654,6 +710,278 @@
             }
         }
 
+        // ===== VARIÁVEIS PARA PLANOS DE AÇÃO =====
+        let todosPlanos = [];
+
+        // ===== CARREGAR PLANOS DE AÇÃO =====
+        async function carregarPlanos() {
+            try {
+                document.getElementById('planosList').innerHTML = '<div class="loading">🔄 Carregando planos de ação...</div>';
+                
+                const response = await fetch(`${GOOGLE_API_URL}?acao=carregarTudo&aba=acoes&_=${Date.now()}`);
+                const result = await response.json();
+                
+                if (result.status === 'sucesso' && result.dados) {
+                    todosPlanos = result.dados
+                        .map(item => {
+                            try { return JSON.parse(item.dados); } 
+                            catch (e) { return null; }
+                        })
+                        .filter(plano => plano !== null);
+                    
+                    atualizarStatsPlanos();
+                    mostrarPlanos(todosPlanos);
+                } else {
+                    document.getElementById('planosList').innerHTML = 
+                        '<div class="empty-state">✓ Nenhum plano de ação encontrado</div>';
+                    atualizarStatsPlanos();
+                }
+            } catch (e) {
+                console.error('Erro ao carregar planos:', e);
+                document.getElementById('planosList').innerHTML = 
+                    '<div class="empty-state">❌ Erro ao carregar planos de ação</div>';
+            }
+        }
+
+        // ===== ESTATÍSTICAS DOS PLANOS =====
+        function atualizarStatsPlanos() {
+            const stats = {
+                total: todosPlanos.length,
+                pendentes: todosPlanos.filter(p => p.status === 'Pendente').length,
+                andamento: todosPlanos.filter(p => p.status === 'Em andamento').length,
+                concluidas: todosPlanos.filter(p => p.status === 'Concluída').length
+            };
+            
+            document.getElementById('statsPlanos').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.total}</div>
+                    <div class="stat-label">Total de Planos</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--warning);">
+                    <div class="stat-value">${stats.pendentes}</div>
+                    <div class="stat-label">Pendentes</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--secondary);">
+                    <div class="stat-value">${stats.andamento}</div>
+                    <div class="stat-label">Em Andamento</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success);">
+                    <div class="stat-value">${stats.concluidas}</div>
+                    <div class="stat-label">Concluídos</div>
+                </div>
+            `;
+        }
+
+        // ===== FILTRAR PLANOS =====
+        function filtrarPlanos() {
+            const busca = (document.getElementById('searchPlano')?.value || '').toLowerCase();
+            const status = document.getElementById('filterPlanoStatus')?.value || '';
+            const prioridade = document.getElementById('filterPlanoPrioridade')?.value || '';
+            const tipo = document.getElementById('filterPlanoTipo')?.value || '';
+            
+            let filtrados = [...todosPlanos];
+            
+            if (busca) {
+                filtrados = filtrados.filter(p => 
+                    (p.descricao && p.descricao.toLowerCase().includes(busca)) ||
+                    (p.responsavel && p.responsavel.toLowerCase().includes(busca)) ||
+                    (p.tipo && p.tipo.toLowerCase().includes(busca))
+                );
+            }
+            
+            if (status) filtrados = filtrados.filter(p => p.status === status);
+            if (prioridade) filtrados = filtrados.filter(p => p.prioridade === prioridade);
+            if (tipo) filtrados = filtrados.filter(p => p.tipo === tipo);
+            
+            mostrarPlanos(filtrados);
+        }
+
+        // ===== MOSTRAR PLANOS NA TABELA =====
+        function mostrarPlanos(planos) {
+            const container = document.getElementById('planosList');
+            
+            if (planos.length === 0) {
+                container.innerHTML = '<div class="empty-state">🔍 Nenhum plano encontrado com esses filtros</div>';
+                return;
+            }
+            
+            planos.sort((a, b) => {
+                const prioridade = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+                const compPrioridade = (prioridade[b.prioridade] || 0) - (prioridade[a.prioridade] || 0);
+                if (compPrioridade !== 0) return compPrioridade;
+                return new Date(b.dataCriacao) - new Date(a.dataCriacao);
+            });
+            
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Responsável</th>
+                                <th>Prazo</th>
+                                <th>Prioridade</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${planos.map(plano => {
+                                const hoje = new Date();
+                                hoje.setHours(0, 0, 0, 0);
+                                const prazoDate = plano.prazo ? new Date(plano.prazo + 'T00:00:00') : null;
+                                const prazoVencido = prazoDate && prazoDate < hoje && plano.status !== 'Concluída';
+                                
+                                return `
+                                <tr style="${plano.prioridade === 'Alta' ? 'background: #fef2f2;' : ''}${prazoVencido ? 'border-left: 4px solid var(--danger);' : ''}">
+                                    <td><span class="badge badge-info">${plano.tipo || 'Manual'}</span></td>
+                                    <td>
+                                        <div style="max-width: 300px;">
+                                            <strong>${plano.descricao || 'Sem descrição'}</strong>
+                                            ${plano.acidenteRef ? `<br><small style="color: var(--danger);">🚨 Acidente: ${plano.acidenteRef.nome || ''}</small>` : ''}
+                                        </div>
+                                    </td>
+                                    <td>${plano.responsavel || 'Não definido'}</td>
+                                    <td>
+                                        <span style="${prazoVencido ? 'color: var(--danger); font-weight: bold;' : ''}">
+                                            ${plano.prazo ? formatarData(plano.prazo) : 'Não definido'}
+                                            ${prazoVencido ? '<br><small>⚠️ Vencido!</small>' : ''}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-${plano.prioridade === 'Alta' ? 'danger' : plano.prioridade === 'Média' ? 'warning' : 'info'}">
+                                            ${plano.prioridade || 'Média'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <select class="status-select" 
+                                                onchange="atualizarStatusPlano('${plano.id}', this.value)"
+                                                style="background: ${getPlanoStatusBgColor(plano.status)};">
+                                            <option value="Pendente" ${plano.status === 'Pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                                            <option value="Em andamento" ${plano.status === 'Em andamento' ? 'selected' : ''}>🔄 Em andamento</option>
+                                            <option value="Concluída" ${plano.status === 'Concluída' ? 'selected' : ''}>✅ Concluída</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="verDetalhesPlano('${plano.id}')" title="Ver detalhes">
+                                            👁️ Ver
+                                        </button>
+                                    </td>
+                                </tr>
+                            `}).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // ===== ATUALIZAR STATUS DO PLANO =====
+        async function atualizarStatusPlano(id, novoStatus) {
+            const plano = todosPlanos.find(p => p.id === id);
+            if (!plano) return;
+            
+            showAlert('⏳ Atualizando status...', 'info');
+            
+            const statusAnterior = plano.status;
+            plano.status = novoStatus;
+            plano.dataAtualizacao = new Date().toISOString();
+            
+            try {
+                const dadosStr = encodeURIComponent(JSON.stringify(plano));
+                const response = await fetch(
+                    `${GOOGLE_API_URL}?acao=salvar&aba=acoes&id=${encodeURIComponent(id)}&dados=${dadosStr}`
+                );
+                const result = await response.json();
+                
+                if (result.status === 'sucesso') {
+                    showAlert(`✅ Status atualizado: ${statusAnterior} → ${novoStatus}`, 'success');
+                    atualizarStatsPlanos();
+                    filtrarPlanos();
+                } else {
+                    plano.status = statusAnterior;
+                    showAlert('❌ Erro ao atualizar status', 'error');
+                    filtrarPlanos();
+                }
+            } catch (e) {
+                plano.status = statusAnterior;
+                console.error('Erro ao atualizar:', e);
+                showAlert('❌ Erro de conexão ao atualizar', 'error');
+                filtrarPlanos();
+            }
+        }
+
+        // ===== VER DETALHES DO PLANO =====
+        function verDetalhesPlano(id) {
+            const plano = todosPlanos.find(p => p.id === id);
+            if (!plano) return;
+            
+            document.getElementById('modalTitle').textContent = '✓ Detalhes do Plano de Ação';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="detail-section">
+                    <h4>Informações Gerais</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <p><strong>Tipo:</strong> <span class="badge badge-info">${plano.tipo || 'Manual'}</span></p>
+                        <p><strong>Status:</strong> <span class="badge badge-${plano.status === 'Concluída' ? 'success' : plano.status === 'Em andamento' ? 'info' : 'warning'}">${plano.status || 'Pendente'}</span></p>
+                        <p><strong>Prioridade:</strong> <span class="badge badge-${plano.prioridade === 'Alta' ? 'danger' : plano.prioridade === 'Média' ? 'warning' : 'info'}">${plano.prioridade || 'Média'}</span></p>
+                        <p><strong>Prazo:</strong> ${plano.prazo ? formatarData(plano.prazo) : 'Não definido'}</p>
+                        <p><strong>Responsável:</strong> ${plano.responsavel || 'Não definido'}</p>
+                        <p><strong>Criado em:</strong> ${plano.dataCriacao ? new Date(plano.dataCriacao).toLocaleString('pt-BR') : 'N/I'}</p>
+                    </div>
+                </div>
+                
+                ${plano.acidenteRef ? `
+                    <div class="detail-section" style="background: #fee2e2;">
+                        <h4>🚨 Acidente Relacionado</h4>
+                        <p><strong>Acidentado:</strong> ${plano.acidenteRef.nome || 'N/I'}</p>
+                        <p><strong>Data:</strong> ${plano.acidenteRef.data ? formatarData(plano.acidenteRef.data) : 'N/I'}</p>
+                        <p><strong>Setor:</strong> ${plano.acidenteRef.setor || 'N/I'}</p>
+                    </div>
+                ` : ''}
+                
+                <div class="detail-section">
+                    <h4>Descrição da Ação</h4>
+                    <p style="white-space: pre-wrap;">${plano.descricao || 'Não informada'}</p>
+                </div>
+                
+                ${plano.recursos ? `
+                    <div class="detail-section">
+                        <h4>Recursos Necessários</h4>
+                        <p style="white-space: pre-wrap;">${plano.recursos}</p>
+                    </div>
+                ` : ''}
+                
+                ${plano.indicador ? `
+                    <div class="detail-section">
+                        <h4>Indicador de Eficácia</h4>
+                        <p style="white-space: pre-wrap;">${plano.indicador}</p>
+                    </div>
+                ` : ''}
+                
+                <div class="detail-section">
+                    <h4>Alterar Status</h4>
+                    <select class="status-select" 
+                            onchange="atualizarStatusPlano('${plano.id}', this.value); verDetalhesPlano('${plano.id}');"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        <option value="Pendente" ${plano.status === 'Pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                        <option value="Em andamento" ${plano.status === 'Em andamento' ? 'selected' : ''}>🔄 Em andamento</option>
+                        <option value="Concluída" ${plano.status === 'Concluída' ? 'selected' : ''}>✅ Concluída</option>
+                    </select>
+                </div>
+            `;
+            
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        // ===== FUNÇÃO AUXILIAR PARA COR DE FUNDO DO STATUS =====
+        function getPlanoStatusBgColor(status) {
+            const colors = {
+                'Pendente': '#fef3c7',
+                'Em andamento': '#dbeafe',
+                'Concluída': '#dcfce7'
+            };
+            return colors[status] || '#f9fafb';
+        }
 
         // ===== INICIALIZAÇÃO =====
         document.addEventListener('DOMContentLoaded', () => {
