@@ -3124,134 +3124,188 @@ function loadAtasSalvas() {
     `;
 }
 
-function visualizarAta(id) {
-    const atas = storageGet(STORAGE_KEYS.ATAS) || [];
-    const ata = atas.find(a => a.id === id);
-    if (!ata) { showAlert('ATA não encontrada', 'error'); return; }
-    
-    const camposCustom = (ata.dadosConfiguracao && ata.dadosConfiguracao.camposCustom) 
-        ? ata.dadosConfiguracao.camposCustom 
-        : storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
-    
-    let html = `
-        <div style="padding: 2rem;">
-            <div class="print-only" style="text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 1rem;">
-                <h1 style="margin-bottom: 0.5rem;">ATA DE REUNIÃO CIPA</h1>
-                <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.25rem;">
-                    ${escapeHtml(ata.dadosConfiguracao ? ata.dadosConfiguracao.unidade : ata.unidade || 'Não informado')}
-                </p>
-                ${ata.dadosConfiguracao && ata.dadosConfiguracao.cnpj ? `
-                    <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">
-                        <strong>CNPJ:</strong> ${escapeHtml(ata.dadosConfiguracao.cnpj)}
-                    </p>
-                ` : ''}
-                ${ata.dadosConfiguracao && ata.dadosConfiguracao.endereco ? `
-                    <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">
-                        <strong>Endereço:</strong> ${escapeHtml(ata.dadosConfiguracao.endereco)}
-                    </p>
-                ` : ''}
-            </div>
+        function visualizarAta(id) {
+            const atas = storageGet(STORAGE_KEYS.ATAS) || [];
+            const ata = atas.find(a => a.id === id);
+            if (!ata) { showAlert('ATA não encontrada', 'error'); return; }
             
-            <h2 style="color: var(--primary); margin-bottom: 1rem;">Seção 1 - Abertura</h2>
-            <p><strong>Data:</strong> ${formatDate(ata.secao1.dataReuniao)}</p>
-            <p><strong>Horário:</strong> ${ata.secao1.horaInicio} - ${ata.secao1.horaTermino || 'N/I'}</p>
-            <p><strong>Local:</strong> ${escapeHtml(ata.secao1.local)}</p>
-            ${renderCustomFieldsView(ata.customFields, camposCustom, 1)}
+            const camposCustom = (ata.dadosConfiguracao && ata.dadosConfiguracao.camposCustom) 
+                ? ata.dadosConfiguracao.camposCustom 
+                : storageGet(STORAGE_KEYS.CAMPOS_CUSTOM) || [];
             
-            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 2 - Presenças</h2>
-            <h3 style="color: var(--primary); font-size: 1rem;">👥 Membros da CIPA</h3>
-            <ul>
-                ${ata.secao2.presencas.map(p => `
-                    <li>${p.presente ? '✓' : '✕'} ${escapeHtml(p.nome)} - ${escapeHtml(p.funcao)} (${escapeHtml(p.tipo)})</li>
-                `).join('')}
-            </ul>
-            ${ata.secao3.convidadosFrequentes && ata.secao3.convidadosFrequentes.length > 0 ? `
-                <h3 style="color: var(--secondary); font-size: 1rem; margin-top: 1rem;">👤 Convidados Frequentes</h3>
-                <ul>
-                    ${ata.secao3.convidadosFrequentes.map(c => `
-                        <li>${c.presente ? '✓' : '✕'} ${escapeHtml(c.nome)} (Convidado)</li>
-                    `).join('')}
-                </ul>
-            ` : ''}
-            ${renderCustomFieldsView(ata.customFields, camposCustom, 2)}
-            
-            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 3 - Convidados Adicionais</h2>
-            ${ata.secao3.convidadosAdicionais && ata.secao3.convidadosAdicionais.length > 0 ? 
-                `<ul>${ata.secao3.convidadosAdicionais.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : 
-                '<p>Nenhum convidado adicional</p>'}
-            ${renderCustomFieldsView(ata.customFields, camposCustom, 3)}
-            
-            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 4 - Acidentes</h2>
-            ${ata.secao4.acidentes.filter(a => a && a.nome && a.nome.trim()).length > 0 ? 
-                ata.secao4.acidentes.filter(a => a && a.nome && a.nome.trim()).map((a, i) => `
-                    <div style="border: 1px solid var(--gray-300); padding: 1rem; margin-bottom: 1rem; border-radius: var(--radius);">
-                        <h4>Acidente ${i + 1} - ${escapeHtml(a.nome)}</h4>
-                        <p><strong>Função:</strong> ${escapeHtml(a.funcao || 'N/I')} | <strong>Setor:</strong> ${escapeHtml(a.setor || 'N/I')}</p>
-                        <p><strong>Data/Local:</strong> ${formatDate(a.data)} às ${a.hora || 'N/I'} - ${escapeHtml(a.local || 'N/I')}</p>
-                        <p><strong>Tipo:</strong> ${escapeHtml(a.tipo || 'N/I')} | <strong>CAT:</strong> ${escapeHtml(a.cat || 'N/I')}</p>
-                        <p><strong>Descrição:</strong> ${escapeHtml(a.descricao || 'N/I')}</p>
-                        <p><strong>Causa:</strong> ${escapeHtml(a.causa || 'N/I')}</p>
-                        <p><strong>Medidas Imediatas:</strong> ${escapeHtml(a.medidasImediatas || 'N/I')}</p>
-                        <p><strong>Medidas Preventivas:</strong> ${escapeHtml(a.medidasPreventivas || 'N/I')}</p>
+            let html = `
+                <div style="padding: 2rem;">
+                    <div class="print-only" style="text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 1rem;">
+                        <h1 style="margin-bottom: 0.5rem;">ATA DE REUNIÃO CIPA</h1>
+                        <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.25rem;">
+                            ${escapeHtml(ata.dadosConfiguracao ? ata.dadosConfiguracao.unidade : ata.unidade || 'Não informado')}
+                        </p>
+                        ${ata.dadosConfiguracao && ata.dadosConfiguracao.cnpj ? `
+                            <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                <strong>CNPJ:</strong> ${escapeHtml(ata.dadosConfiguracao.cnpj)}
+                            </p>
+                        ` : ''}
+                        ${ata.dadosConfiguracao && ata.dadosConfiguracao.endereco ? `
+                            <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                <strong>Endereço:</strong> ${escapeHtml(ata.dadosConfiguracao.endereco)}
+                            </p>
+                        ` : ''}
                     </div>
-                `).join('') : '<p>Nenhum acidente registrado</p>'}
-            ${renderCustomFieldsView(ata.customFields, camposCustom, 4)}
-            
-            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 5 - Pauta</h2>
-            <p><strong>Tema 1:</strong> ${escapeHtml(ata.secao5.temas.tema1 || 'N/I')}</p>
-            <p><strong>Tema 2:</strong> ${escapeHtml(ata.secao5.temas.tema2 || 'N/I')}</p>
-            ${ata.secao5.temas.extras.map((t, i) => `<p><strong>Tema ${i+3}:</strong> ${escapeHtml(t)}</p>`).join('')}
-            
-            <h3 style="margin-top: 1.5rem;">Demandas por Setor</h3>
-            ${ata.secao5.demandas.length > 0 ? 
-                ata.secao5.demandas.filter(d => d.setor || d.solicitante || d.descricao || d.resolucao).map(d => `
-                    <div style="border-left: 3px solid var(--secondary); padding-left: 1rem; margin-bottom: 1rem;">
-                        ${d.setor ? `<p><strong>${escapeHtml(d.setor)}</strong>${d.solicitante ? ` - ${escapeHtml(d.solicitante)}` : ''}</p>` : ''}
-                        ${d.prioridade ? `<p><strong>Prioridade:</strong> <span class="badge badge-${d.prioridade === 'Alta' ? 'danger' : d.prioridade === 'Média' ? 'warning' : 'info'}">${escapeHtml(d.prioridade)}</span></p>` : ''}
-                        ${d.descricao ? `<p>${escapeHtml(d.descricao)}</p>` : ''}
-                        ${d.responsavel ? `<p><strong>Responsável:</strong> ${escapeHtml(d.responsavel)}</p>` : ''}
-                        ${d.prazo ? `<p><strong>Prazo:</strong> ${formatDate(d.prazo)}</p>` : ''}
-                    </div>
-                `).join('') : '<p>Nenhuma demanda</p>'}
-            ${renderCustomFieldsView(ata.customFields, camposCustom, 5)}
-            
-            <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 6 - Plano de Ações</h2>
-            ${ata.secao6.acoes.length > 0 ? `
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead><tr style="background: var(--gray-100);">
-                        <th style="padding: 0.5rem; text-align: left;">Ação</th>
-                        <th style="padding: 0.5rem;">Responsável</th>
-                        <th style="padding: 0.5rem;">Prazo</th>
-                        <th style="padding: 0.5rem;">Status</th>
-                    </tr></thead>
-                    <tbody>
-                        ${ata.secao6.acoes.map(a => `
-                            <tr style="border-bottom: 1px solid var(--gray-200);">
-                                <td style="padding: 0.5rem;">${escapeHtml(a.descricao)}</td>
-                                <td style="padding: 0.5rem;">${escapeHtml(a.responsavel)}</td>
-                                <td style="padding: 0.5rem;">${formatDate(a.prazo)}</td>
-                                <td style="padding: 0.5rem;"><span class="badge badge-${a.status === 'Concluída' ? 'success' : 'warning'}">${escapeHtml(a.status)}</span></td>
-                            </tr>
+                    
+                    <!-- SEÇÃO 1 - ABERTURA -->
+                    <h2 style="color: var(--primary); margin-bottom: 1rem;">Seção 1 - Abertura</h2>
+                    <p><strong>Data:</strong> ${formatDate(ata.secao1.dataReuniao)}</p>
+                    <p><strong>Horário:</strong> ${ata.secao1.horaInicio} - ${ata.secao1.horaTermino || 'N/I'}</p>
+                    <p><strong>Local:</strong> ${escapeHtml(ata.secao1.local)}</p>
+                    ${renderCustomFieldsView(ata.customFields, camposCustom, 1)}
+                    
+                    <!-- SEÇÃO 2 - PRESENÇAS -->
+                    <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 2 - Presenças</h2>
+                    <h3 style="color: var(--primary); font-size: 1rem;">👥 Membros da CIPA</h3>
+                    <ul>
+                        ${ata.secao2.presencas.map(p => `
+                            <li>${p.presente ? '✓' : '✕'} ${escapeHtml(p.nome)} - ${escapeHtml(p.funcao)} (${escapeHtml(p.tipo)})</li>
                         `).join('')}
-                    </tbody>
-                </table>
-            ` : '<p>Nenhuma ação definida</p>'}
-            ${renderCustomFieldsView(ata.customFields, camposCustom, 6)}
+                    </ul>
+                    ${ata.secao3.convidadosFrequentes && ata.secao3.convidadosFrequentes.length > 0 ? `
+                        <h3 style="color: var(--secondary); font-size: 1rem; margin-top: 1rem;">👤 Convidados Frequentes</h3>
+                        <ul>
+                            ${ata.secao3.convidadosFrequentes.map(c => `
+                                <li>${c.presente ? '✓' : '✕'} ${escapeHtml(c.nome)} (Convidado)</li>
+                            `).join('')}
+                        </ul>
+                    ` : ''}
+                    ${renderCustomFieldsView(ata.customFields, camposCustom, 2)}
+                    
+                    <!-- SEÇÃO 3 - CONVIDADOS ADICIONAIS -->
+                    <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 3 - Convidados Adicionais</h2>
+                    ${ata.secao3.convidadosAdicionais && ata.secao3.convidadosAdicionais.length > 0 ? 
+                        `<ul>${ata.secao3.convidadosAdicionais.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : 
+                        '<p>Nenhum convidado adicional</p>'}
+                    ${renderCustomFieldsView(ata.customFields, camposCustom, 3)}
+                    
+                    <!-- SEÇÃO 4 - ACIDENTES (COMPLETO) -->
+                    <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 4 - Acidentes de Trabalho</h2>
+            `;
             
-            ${ata.observacoes ? `
-                <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Observações</h2>
-                <p>${escapeHtml(ata.observacoes)}</p>
-            ` : ''}
+            // ACIDENTES - VERSÃO COMPLETA COM TODOS OS CAMPOS
+            const acidentesFiltrados = (ata.secao4.acidentes || []).filter(a => a && a.nome && a.nome.trim());
             
-            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--gray-300); font-size: 0.875rem; color: var(--gray-500);">
-                <p>ATA gerada em ${new Date(ata.dataAtualizacao).toLocaleString('pt-BR')}</p>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('visualizarContent').innerHTML = html;
-    document.getElementById('modalVisualizar').classList.add('active');
-}
+            if (acidentesFiltrados.length > 0) {
+                acidentesFiltrados.forEach((a, i) => {
+                    html += `
+                        <div style="border: 1px solid var(--gray-300); padding: 1rem; margin-bottom: 1rem; border-radius: var(--radius);">
+                            <h4>Acidente ${i + 1} - ${escapeHtml(a.nome)}</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                <p><strong>Função:</strong> ${escapeHtml(a.funcao || 'N/I')}</p>
+                                <p><strong>Setor:</strong> ${escapeHtml(a.setor || 'N/I')}</p>
+                                <p><strong>Data:</strong> ${formatDate(a.data)}</p>
+                                <p><strong>Hora:</strong> ${a.hora || 'N/I'}</p>
+                                <p><strong>Local:</strong> ${escapeHtml(a.local || 'N/I')}</p>
+                                <p><strong>Tipo:</strong> ${escapeHtml(a.tipo || 'N/I')}</p>
+                                <p><strong>CID:</strong> ${escapeHtml(a.cid || 'N/I')}</p>
+                                <p><strong>Parte do Corpo:</strong> ${escapeHtml(a.parteCorpo || 'N/I')}</p>
+                                <p><strong>Natureza da Lesão:</strong> ${escapeHtml(a.lesao || 'N/I')}</p>
+                                <p><strong>Agente Causador:</strong> ${escapeHtml(a.agente || 'N/I')}</p>
+                                <p><strong>CAT:</strong> ${escapeHtml(a.cat || 'N/I')}</p>
+                                <p><strong>Dias Perdidos:</strong> ${a.dias || '0'}</p>
+                                <p><strong>Afastamento:</strong> ${escapeHtml(a.afastamento || 'Não')}</p>
+                                <p><strong>Testemunhas:</strong> ${escapeHtml(a.testemunhas || 'N/I')}</p>
+                            </div>
+                            <div style="margin-top: 0.5rem;">
+                                <p><strong>Descrição:</strong> ${escapeHtml(a.descricao || 'N/I')}</p>
+                                <p><strong>Causa:</strong> ${escapeHtml(a.causa || 'N/I')}</p>
+                                <p><strong>Medidas Imediatas:</strong> ${escapeHtml(a.medidasImediatas || 'N/I')}</p>
+                                <p><strong>Medidas Preventivas:</strong> ${escapeHtml(a.medidasPreventivas || 'N/I')}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p>Nenhum acidente registrado</p>`;
+            }
+            
+            html += `${renderCustomFieldsView(ata.customFields, camposCustom, 4)}
+                    
+                    <!-- SEÇÃO 5 - PAUTA E DEMANDAS (COMPLETO) -->
+                    <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 5 - Pauta da Reunião</h2>
+                    <p><strong>Tema 1 - Leitura da Ata Anterior:</strong> ${escapeHtml(ata.secao5.temas.tema1 || 'N/I')}</p>
+                    <p><strong>Tema 2 - Ações da Reunião Anterior:</strong> ${escapeHtml(ata.secao5.temas.tema2 || 'N/I')}</p>
+                    ${(ata.secao5.temas.extras || []).map((t, i) => `<p><strong>Tema ${i+3}:</strong> ${escapeHtml(t)}</p>`).join('')}
+                    
+                    <h3 style="margin-top: 1.5rem;">📋 Demandas por Setor</h3>
+            `;
+            
+            // DEMANDAS POR SETOR - VERSÃO COMPLETA
+            const demandasFiltradas = (ata.secao5.demandas || []).filter(d => d && (d.setor || d.solicitante || d.descricao || d.resolucao));
+            
+            if (demandasFiltradas.length > 0) {
+                demandasFiltradas.forEach(d => {
+                    html += `
+                        <div style="border-left: 3px solid var(--secondary); padding-left: 1rem; margin-bottom: 1rem;">
+                            ${d.setor ? `<p><strong>Setor:</strong> ${escapeHtml(d.setor)}</p>` : ''}
+                            ${d.solicitante ? `<p><strong>Solicitante:</strong> ${escapeHtml(d.solicitante)}</p>` : ''}
+                            ${d.prioridade ? `<p><strong>Prioridade:</strong> <span class="badge badge-${d.prioridade === 'Alta' ? 'danger' : d.prioridade === 'Média' ? 'warning' : 'info'}">${escapeHtml(d.prioridade)}</span></p>` : ''}
+                            ${d.descricao ? `<p><strong>Descrição:</strong> ${escapeHtml(d.descricao)}</p>` : ''}
+                            ${d.responsavel ? `<p><strong>Responsável:</strong> ${escapeHtml(d.responsavel)}</p>` : ''}
+                            ${d.prazo ? `<p><strong>Prazo:</strong> ${formatDate(d.prazo)}</p>` : ''}
+                            ${d.resolucao ? `<p><strong>Resolução Proposta:</strong> ${escapeHtml(d.resolucao)}</p>` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p>Nenhuma demanda registrada</p>`;
+            }
+            
+            html += `${renderCustomFieldsView(ata.customFields, camposCustom, 5)}
+                    
+                    <!-- SEÇÃO 6 - AÇÕES -->
+                    <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Seção 6 - Plano de Ações Definidas</h2>
+            `;
+            
+            const acoesFiltradas = (ata.secao6.acoes || []).filter(a => a && a.descricao && a.descricao.trim());
+            
+            if (acoesFiltradas.length > 0) {
+                html += `
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead><tr style="background: var(--gray-100);">
+                            <th style="padding: 0.5rem; text-align: left;">Ação</th>
+                            <th style="padding: 0.5rem;">Responsável</th>
+                            <th style="padding: 0.5rem;">Prazo</th>
+                            <th style="padding: 0.5rem;">Status</th>
+                        </tr></thead>
+                        <tbody>
+                            ${acoesFiltradas.map(a => `
+                                <tr style="border-bottom: 1px solid var(--gray-200);">
+                                    <td style="padding: 0.5rem;">${escapeHtml(a.descricao)}</td>
+                                    <td style="padding: 0.5rem;">${escapeHtml(a.responsavel)}</td>
+                                    <td style="padding: 0.5rem;">${formatDate(a.prazo)}</td>
+                                    <td style="padding: 0.5rem;"><span class="badge badge-${a.status === 'Concluída' ? 'success' : 'warning'}">${escapeHtml(a.status)}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                html += `<p>Nenhuma ação definida</p>`;
+            }
+            
+            html += `${renderCustomFieldsView(ata.customFields, camposCustom, 6)}
+                    
+                    ${ata.observacoes ? `
+                        <h2 style="color: var(--primary); margin: 2rem 0 1rem;">Observações</h2>
+                        <p>${escapeHtml(ata.observacoes)}</p>
+                    ` : ''}
+                    
+                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--gray-300); font-size: 0.875rem; color: var(--gray-500);">
+                        <p>ATA gerada em ${new Date(ata.dataAtualizacao).toLocaleString('pt-BR')}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('visualizarContent').innerHTML = html;
+            document.getElementById('modalVisualizar').classList.add('active');
+        }
 
 function renderCustomFieldsView(customFields, camposDefinicao, secao) {
     if (!customFields) return '';
