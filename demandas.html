@@ -1161,10 +1161,10 @@
                                     </td>
                                     <td style="padding: 0.875rem 1rem;">
                                         <div style="max-width: 300px;">
-                                            <strong>${escapeHtml(demanda.descricao || 'Sem descrição')}</strong>
+                                            <strong>${escapeHtml(demanda.descricao ? (demanda.descricao.length > 80 ? demanda.descricao.substring(0, 80) + '...' : demanda.descricao) : 'Sem descrição')}</strong>
                                             ${demanda.observacoes ? `<br><small style="color: var(--gray-500);">📝 ${escapeHtml(demanda.observacoes.substring(0, 50))}${demanda.observacoes.length > 50 ? '...' : ''}</small>` : ''}
                                         </div>
-                                    </td>
+                                     </td>
                                     <td style="padding: 0.875rem 1rem;">${escapeHtml(demanda.origem || 'N/I')}</td>
                                     <td style="padding: 0.875rem 1rem;">${escapeHtml(demanda.solicitante || 'N/I')}</td>
                                     <td style="padding: 0.875rem 1rem;">${escapeHtml(demanda.responsavel || 'Não definido')}</td>
