@@ -1399,6 +1399,17 @@
             }
             
             const ataIds = Object.keys(fluxosFiltrados);
+
+            // Ordenar ATAs por data mais recente primeiro (usando a data da ata)
+            ataIds.sort((a, b) => {
+                const ataA = todasAtas.find(ata => ata.id === a);
+                const ataB = todasAtas.find(ata => ata.id === b);
+                
+                const dataA = ataA ? new Date(ataA.secao1?.dataReuniao) : new Date(0);
+                const dataB = ataB ? new Date(ataB.secao1?.dataReuniao) : new Date(0);
+                
+                return dataB - dataA; // Mais recente primeiro
+            });
             
             if (ataIds.length === 0) {
                 container.innerHTML = '<div class="empty-state">📈 Nenhuma tarefa no fluxograma</div>';
