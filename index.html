@@ -3769,23 +3769,27 @@ function initFluxograma() {
     carregarFluxograma();
 }
 
-function carregarFluxograma() {
-    const ataId = document.getElementById('fluxogramaAta').value;
-    const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
-    
-    let tarefas = [];
-    if (ataId) {
-        tarefas = (fluxos[ataId] || []).map((t, i) => ({ ...t, originalIndex: i, ataId }));
-    } else {
-        Object.keys(fluxos).forEach(key => {
-            (fluxos[key] || []).forEach((t, i) => {
-                tarefas.push({ ...t, originalIndex: tarefas.length, ataId: key });
-            });
-        });
-    }
-    
-    renderFluxograma(tarefas);
-}
+        function carregarFluxograma() {
+            const ataId = document.getElementById('fluxogramaAta').value;
+            const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+            
+            let tarefas = [];
+            if (ataId) {
+                // ⚠️ CORREÇÃO: Só carregar se a ATA realmente existe no objeto fluxos
+                tarefas = (fluxos[ataId] || []).map((t, i) => ({ ...t, originalIndex: i, ataId }));
+            } else {
+                Object.keys(fluxos).forEach(key => {
+                    // ⚠️ CORREÇÃO: Ignorar chaves que não são IDs de ATA válidos
+                    if (key && key !== 'sem-ata' && key !== 'null' && key !== 'undefined') {
+                        (fluxos[key] || []).forEach((t, i) => {
+                            tarefas.push({ ...t, originalIndex: tarefas.length, ataId: key });
+                        });
+                    }
+                });
+            }
+            
+            renderFluxograma(tarefas);
+        }
 
 function renderFluxograma(tarefas) {
     const container = document.getElementById('fluxogramaContainer');
@@ -3856,38 +3860,43 @@ function renderFluxograma(tarefas) {
     container.innerHTML = html;
 }
 
-function adicionarTarefaFluxo() {
-    const ataId = document.getElementById('fluxogramaAta').value;
-    
-    const descricao = prompt('Descrição da tarefa:');
-    if (!descricao) return;
-    
-    const responsavel = prompt('Responsável:') || '';
-    const prazo = prompt('Prazo (AAAA-MM-DD):') || '';
-    const status = prompt('Status (Pendente, Em andamento, Concluída):') || 'Pendente';
-    
-    const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
-    const chave = ataId || 'sem-ata';
-    
-    if (!fluxos[chave]) fluxos[chave] = [];
-    
-    fluxos[chave].push({
-        id: generateId(),
-        descricao,
-        responsavel,
-        prazo,
-        status,
-        ataId: ataId || 'sem-ata'
-    });
-    
-    storageSet(STORAGE_KEYS.FLUXOGRAMAS, fluxos);
-    if (CONFIG.usarGoogleSheets && ataId) {
-        googleSheetsSet('fluxogramas', ataId, fluxos[chave]);
-    }
-    
-    carregarFluxograma();
-    showAlert('✅ Tarefa adicionada!', 'success');
-}
+        function adicionarTarefaFluxo() {
+            const ataId = document.getElementById('fluxogramaAta').value;
+            
+            // ⚠️ CORREÇÃO: Verificar se uma ATA foi selecionada
+            if (!ataId) {
+                showAlert('❌ Selecione uma ATA antes de adicionar uma tarefa!', 'error');
+                return;
+            }
+            
+            const descricao = prompt('Descrição da tarefa:');
+            if (!descricao) return;
+            
+            const responsavel = prompt('Responsável:') || '';
+            const prazo = prompt('Prazo (AAAA-MM-DD):') || '';
+            const status = prompt('Status (Pendente, Em andamento, Concluída):') || 'Pendente';
+            
+            const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
+            
+            if (!fluxos[ataId]) fluxos[ataId] = [];
+            
+            fluxos[ataId].push({
+                id: generateId(),
+                descricao,
+                responsavel,
+                prazo,
+                status,
+                ataId: ataId
+            });
+            
+            storageSet(STORAGE_KEYS.FLUXOGRAMAS, fluxos);
+            if (CONFIG.usarGoogleSheets && ataId) {
+                googleSheetsSet('fluxogramas', ataId, fluxos[ataId]);
+            }
+            
+            carregarFluxograma();
+            showAlert('✅ Tarefa adicionada!', 'success');
+        }
 
 function editarTarefaFluxo(ataId, index) {
     const fluxos = storageGet(STORAGE_KEYS.FLUXOGRAMAS) || {};
