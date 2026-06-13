@@ -3599,8 +3599,14 @@ function loadPlanosAcao() {
     // 1. Itens NÃO concluídos primeiro (por prazo mais apertado)
     // 2. Itens concluídos por último
     const acoesOrdenadas = [...acoes].sort((a, b) => {
-        const concluidaA = (a.status === 'Concluída');
-        const concluidaB = (b.status === 'Concluída');
+        // Verificar se é concluída (aceitando várias variações)
+        const isConcluida = (status) => {
+            if (!status) return false;
+            const statusLower = status.toLowerCase();
+            return statusLower.startsWith('conclu');
+        };
+        const concluidaA = isConcluida(a.status);
+        const concluidaB = isConcluida(b.status);
         
         // Se um é concluído e o outro não, o concluído vai depois
         if (concluidaA !== concluidaB) {
@@ -3645,7 +3651,7 @@ function loadPlanosAcao() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${acoes.map(a => `
+                    ${acoesOrdenadas.map(a => `
                         <tr style="${a.prioridade === 'Alta' ? 'background: #fef2f2;' : ''}">
                             <td><span class="badge badge-info">${escapeHtml(a.tipo || 'Manual')}</span></td>
                             <td>
@@ -3889,9 +3895,21 @@ function renderFluxograma(tarefas) {
         tarefasPorAta[key].push(t);
     });
     
+    // Obter IDs das ATAs e ordenar por data (mais recente primeiro)
+    let ataIds = Object.keys(tarefasPorAta);
+    ataIds.sort((a, b) => {
+        const ataA = atas.find(ata => ata.id === a);
+        const ataB = atas.find(ata => ata.id === b);
+        
+        const dataA = ataA ? new Date(ataA.secao1?.dataReuniao) : new Date(0);
+        const dataB = ataB ? new Date(ataB.secao1?.dataReuniao) : new Date(0);
+        
+        return dataB - dataA; // Mais recente primeiro
+    });
+    
     let html = '';
     
-    Object.keys(tarefasPorAta).forEach(ataId => {
+    ataIds.forEach(ataId => {
         const grupo = tarefasPorAta[ataId];
         const ata = atas.find(a => a.id === ataId);
         
