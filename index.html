@@ -3651,8 +3651,15 @@ function loadPlanosAcao() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${acoesOrdenadas.map(a => `
-                        <tr style="${a.prioridade === 'Alta' ? 'background: #fef2f2;' : ''}">
+${acoesOrdenadas.map(a => {
+    let estilo = '';
+    if (a.status === 'Concluída') {
+        estilo = 'background: #dcfce7;';  // Verde claro para concluídos
+    } else if (a.prioridade === 'Alta') {
+        estilo = 'background: #fef2f2;';  // Vermelho claro para alta prioridade
+    }
+    return `
+                        <tr style="${estilo}">
                             <td><span class="badge badge-info">${escapeHtml(a.tipo || 'Manual')}</span></td>
                             <td>
                                 <div style="max-width: 300px;">
@@ -3687,7 +3694,8 @@ function loadPlanosAcao() {
                                 <button class="btn btn-danger btn-sm" onclick="excluirAcao('${a.id}')">🗑️</button>
                             </td>
                         </tr>
-                    `).join('')}
+    `;
+}).join('')}
                 </tbody>
             </table>
         </div>
