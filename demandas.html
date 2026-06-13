@@ -1428,16 +1428,7 @@
                     
                     return prazoA - prazoB;
                 });
-                    
-                    if (concluidaA !== concluidaB) {
-                        return concluidaA ? 1 : -1;
-                    }
-                    
-                    const prazoA = a.prazo ? new Date(a.prazo + 'T00:00:00') : new Date('9999-12-31');
-                    const prazoB = b.prazo ? new Date(b.prazo + 'T00:00:00') : new Date('9999-12-31');
-                    
-                    return prazoA - prazoB;
-                });
+                
                 const ata = todasAtas.find(a => a.id === ataId);
                 
                 // Título do grupo
