@@ -3595,12 +3595,39 @@ function loadPlanosAcao() {
         return;
     }
     
-    const prioridadeOrder = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
-    acoes.sort((a, b) => {
-        const pComp = (prioridadeOrder[b.prioridade] || 0) - (prioridadeOrder[a.prioridade] || 0);
-        if (pComp !== 0) return pComp;
+    // Ordenar planos:
+    // 1. Itens NÃO concluídos primeiro (por prazo mais apertado)
+    // 2. Itens concluídos por último
+    const acoesOrdenadas = [...acoes].sort((a, b) => {
+        const concluidaA = (a.status === 'Concluída');
+        const concluidaB = (b.status === 'Concluída');
+        
+        // Se um é concluído e o outro não, o concluído vai depois
+        if (concluidaA !== concluidaB) {
+            return concluidaA ? 1 : -1;
+        }
+        
+        // Ambos são concluídos ou ambos não são → ordenar por prazo (mais apertado primeiro)
+        const prazoA = a.prazo ? new Date(a.prazo + 'T00:00:00') : new Date('9999-12-31');
+        const prazoB = b.prazo ? new Date(b.prazo + 'T00:00:00') : new Date('9999-12-31');
+        
+        if (prazoA.getTime() !== prazoB.getTime()) {
+            return prazoA - prazoB;
+        }
+        
+        // Desempate por prioridade (Alta > Média > Baixa)
+        const prioridade = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+        const priorA = prioridade[a.prioridade] || 0;
+        const priorB = prioridade[b.prioridade] || 0;
+        if (priorA !== priorB) {
+            return priorB - priorA;
+        }
+        
+        // Desempate por data de criação (mais recente primeiro)
         return new Date(b.dataCriacao) - new Date(a.dataCriacao);
     });
+    
+    // Depois, use acoesOrdenadas no lugar de acoes no innerHTML
     
     container.innerHTML = `
         <div class="table-container">
@@ -4455,7 +4482,30 @@ function carregarListaDemandas() {
     if (filtroStatus) filtradas = filtradas.filter(d => d.status === filtroStatus);
     if (filtroPrioridade) filtradas = filtradas.filter(d => d.prioridade === filtroPrioridade);
     
-    filtradas.sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+    // Ordenar demandas:
+    // 1. Itens NÃO concluídos/indeferidos primeiro (por prazo mais apertado)
+    // 2. Itens concluídos/indeferidos por último
+    filtradas.sort((a, b) => {
+        // Status que vão para o final
+        const statusFinalA = (a.status === 'Concluído' || a.status === 'Indeferido');
+        const statusFinalB = (b.status === 'Concluído' || b.status === 'Indeferido');
+        
+        // Se um é final e o outro não, o final vai depois
+        if (statusFinalA !== statusFinalB) {
+            return statusFinalA ? 1 : -1;
+        }
+        
+        // Ambos são finais ou ambos não são finais → ordenar por prazo (mais apertado primeiro)
+        const prazoA = a.prazo ? new Date(a.prazo + 'T00:00:00') : new Date('9999-12-31');
+        const prazoB = b.prazo ? new Date(b.prazo + 'T00:00:00') : new Date('9999-12-31');
+        
+        if (prazoA.getTime() !== prazoB.getTime()) {
+            return prazoA - prazoB;
+        }
+        
+        // Desempate por data de criação (mais recente primeiro)
+        return new Date(b.dataCriacao) - new Date(a.dataCriacao);
+    });
     
     if (filtradas.length === 0) {
         container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><p>Nenhuma demanda encontrada</p></div>`;
