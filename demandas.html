@@ -1458,6 +1458,14 @@
             return date.toLocaleDateString('pt-BR');
         }
 
+        // ===== FUNÇÃO PARA ESCAPAR HTML (SEGURANÇA) =====
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function getStatusBadgeColor(status) {
             const colors = {
                 'Pendente': 'warning',
