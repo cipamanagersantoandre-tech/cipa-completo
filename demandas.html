@@ -1412,8 +1412,22 @@
                 
                 // Ordenar tarefas: não concluídas primeiro (por prazo mais apertado), concluídas por último
                 const tarefasOrdenadas = [...tarefas].sort((a, b) => {
-                    const concluidaA = (a.status === 'Concluída');
-                    const concluidaB = (b.status === 'Concluída');
+                    // Verificar se é concluída (aceitando Concluída ou Concluído)
+                    const isConcluida = (status) => {
+                        return status === 'Concluída' || status === 'Concluido' || status === 'Concluído' || status === 'concluída' || status === 'concluido';
+                    };
+                    const concluidaA = isConcluida(a.status);
+                    const concluidaB = isConcluida(b.status);
+                    
+                    if (concluidaA !== concluidaB) {
+                        return concluidaA ? 1 : -1;
+                    }
+                    
+                    const prazoA = a.prazo ? new Date(a.prazo + 'T00:00:00') : new Date('9999-12-31');
+                    const prazoB = b.prazo ? new Date(b.prazo + 'T00:00:00') : new Date('9999-12-31');
+                    
+                    return prazoA - prazoB;
+                });
                     
                     if (concluidaA !== concluidaB) {
                         return concluidaA ? 1 : -1;
