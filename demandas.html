@@ -1306,14 +1306,17 @@
                     result.dados.forEach(item => {
                         try {
                             const tarefas = JSON.parse(item.dados);
-                            // SÓ adicionar se tiver tarefas E se a ATA existir
-                            if (Array.isArray(tarefas) && tarefas.length > 0) {
-                                const ataId = item.id || (tarefas[0] && tarefas[0].ataId) || 'sem-ata';
+                            const ataId = item.id || (tarefas[0] && tarefas[0].ataId) || null;
+                            
+                            // ⚠️ CORREÇÃO: SÓ adicionar se tiver tarefas E se tiver um ataId válido
+                            if (Array.isArray(tarefas) && tarefas.length > 0 && ataId && ataId !== 'sem-ata' && ataId !== 'null') {
                                 
                                 // Verificar se a ATA realmente existe
                                 const ataExiste = todasAtas.some(a => a.id === ataId);
-                                if (ataExiste || ataId === 'sem-ata') {
+                                if (ataExiste) {
                                     todosFluxogramas[ataId] = tarefas;
+                                } else {
+                                    console.log(`⚠️ Fluxograma ignorado: ATA ${ataId} não encontrada`);
                                 }
                             }
                         } catch (e) {
