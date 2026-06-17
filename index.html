@@ -3077,7 +3077,6 @@ function loadAtasSalvas() {
     
     // Ordenar: primeiro as NÃO finalizadas (mais recentes), depois as finalizadas (mais recentes)
 atas.sort((a, b) => {
-    // Verificar se é finalizada
     const isFinalizadaA = a.status === 'Finalizada' || a.bloqueada === true;
     const isFinalizadaB = b.status === 'Finalizada' || b.bloqueada === true;
     
@@ -3086,9 +3085,15 @@ atas.sort((a, b) => {
         return isFinalizadaA ? 1 : -1;
     }
     
-    // Se ambas têm o mesmo status (ambas finalizadas ou ambas não finalizadas),
-    // ordenar por data (mais recente primeiro)
-    return b.timestamp - a.timestamp;
+    // Se ambas têm o mesmo status, ordenar pela DATA DA REUNIÃO (mais recente primeiro)
+    const dataA = new Date(a.secao1?.dataReuniao + 'T00:00:00');
+    const dataB = new Date(b.secao1?.dataReuniao + 'T00:00:00');
+    
+    // Se uma das datas for inválida, coloca no final
+    if (isNaN(dataA.getTime())) return 1;
+    if (isNaN(dataB.getTime())) return -1;
+    
+    return dataB - dataA; // Mais recente primeiro
 });
     
     container.innerHTML = `
