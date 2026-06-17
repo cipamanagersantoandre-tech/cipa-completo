@@ -3075,7 +3075,21 @@ function loadAtasSalvas() {
         return;
     }
     
-    atas.sort((a, b) => b.timestamp - a.timestamp);
+    // Ordenar: primeiro as NÃO finalizadas (mais recentes), depois as finalizadas (mais recentes)
+atas.sort((a, b) => {
+    // Verificar se é finalizada
+    const isFinalizadaA = a.status === 'Finalizada' || a.bloqueada === true;
+    const isFinalizadaB = b.status === 'Finalizada' || b.bloqueada === true;
+    
+    // Se uma é finalizada e a outra não, a NÃO finalizada vem primeiro
+    if (isFinalizadaA !== isFinalizadaB) {
+        return isFinalizadaA ? 1 : -1;
+    }
+    
+    // Se ambas têm o mesmo status (ambas finalizadas ou ambas não finalizadas),
+    // ordenar por data (mais recente primeiro)
+    return b.timestamp - a.timestamp;
+});
     
     container.innerHTML = `
         <div class="table-container">
