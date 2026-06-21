@@ -155,9 +155,8 @@
         </header>
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-            
-            <!-- CARDS DE RESUMO -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+                        <!-- CARDS DE RESUMO -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-8">
                 <div class="bg-white rounded-xl shadow card-hover p-5 border-l-4 border-blue-600">
                     <div class="flex items-center justify-between mb-2">
                         <i class="fas fa-file-medical text-blue-600 text-2xl"></i>
@@ -205,6 +204,24 @@
                     <p class="text-sm text-slate-600 mb-1">Média Afast.</p>
                     <p class="text-3xl font-bold text-slate-800" id="cardMediaDias">0</p>
                 </div>
+
+                <!-- Card: Dias sem Acidentes -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl shadow-lg card-hover p-5 border-l-4 border-green-600">
+                    <div class="flex items-center justify-between mb-2">
+                        <i class="fas fa-calendar-check text-green-600 text-2xl animate-pulse"></i>
+                        <span class="text-xs font-semibold text-green-700 bg-green-200 px-2 py-1 rounded-full">EM TEMPO REAL</span>
+                    </div>
+                    <p class="text-sm text-green-800 font-medium mb-1">Dias sem Acidentes</p>
+                    <div id="contadorDias" class="text-2xl font-bold text-green-700">
+                        <span id="diasCount">0</span> dias
+                    </div>
+                    <div id="contadorDetalhe" class="text-xs text-green-600 mt-1">
+                        <span id="horasCount">00</span>h <span id="minutosCount">00</span>min
+                    </div>
+                    <div class="text-xs text-green-500 mt-2">
+                        Último acidente: <span id="ultimoAcidente">Nunca</span>
+                    </div>
+                </div>
             </div>
 
             <!-- GRÁFICOS 2x2 -->
@@ -240,6 +257,16 @@
                     </h3>
                     <div class="h-64"><canvas id="chartAfastamento"></canvas></div>
                 </div>
+            </div>
+
+            <!-- GRÁFICO DE LINHA DO TEMPO - DIAS SEM ACIDENTES -->
+            <div class="bg-white rounded-xl shadow p-6 mb-8">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-green-600"></i>
+                    Evolução dos Dias sem Acidentes
+                </h3>
+                <p class="text-sm text-slate-500 mb-4">Histórico mensal do período sem acidentes</p>
+                <div class="h-72"><canvas id="chartDiasSemAcidentes"></canvas></div>
             </div>
 
             <!-- FILTROS E AÇÕES -->
@@ -536,6 +563,11 @@
             loadData();
             initCharts();
             renderAll();
+            
+            // Atualizar contador a cada minuto
+            setInterval(() => {
+                atualizarContador();
+            }, 60000);
         }
         
         function logout() {
@@ -581,6 +613,8 @@ function saveData() {
             updateFilters();
             renderTable(filtered);
             updateCharts(filtered);
+            atualizarContador();
+            atualizarGraficoHistorico();
         }
         
         function getFilteredData() {
@@ -859,6 +893,45 @@ function saveData() {
                     }
                 }
             });
+            // Gráfico 5: Linha do Tempo - Dias sem Acidentes
+            charts.diasSemAcidentes = new Chart(document.getElementById('chartDiasSemAcidentes'), {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        data: [], 
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#059669',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }] 
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            callbacks: { 
+                                label: (ctx) => `${ctx.parsed.y} dias sem acidentes` 
+                            } 
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Dias sem Acidentes'
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         function updateCharts(data) {
@@ -1125,6 +1198,149 @@ function sincronizar() {
         document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
+
+
+        // === CALCULAR DIAS SEM ACIDENTES ===
+        function calcularDiasSemAcidentes() {
+            if (registros.length === 0) {
+                return { dias: 0, horas: 0, minutos: 0, ultimoAcidente: 'Nunca' };
+            }
+            
+            let ultimaData = null;
+            registros.forEach(r => {
+                if (r.data) {
+                    let dataAtual = r.data;
+                    if (dataAtual.includes('/')) {
+                        const partes = dataAtual.split('/');
+                        dataAtual = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    }
+                    const dataObj = new Date(dataAtual);
+                    if (!isNaN(dataObj.getTime())) {
+                        if (!ultimaData || dataObj > ultimaData) {
+                            ultimaData = dataObj;
+                        }
+                    }
+                }
+            });
+            
+            if (!ultimaData) {
+                return { dias: 0, horas: 0, minutos: 0, ultimoAcidente: 'Nunca' };
+            }
+            
+            const agora = new Date();
+            const diffMs = agora - ultimaData;
+            const diffSegundos = Math.floor(diffMs / 1000);
+            const diffMinutos = Math.floor(diffSegundos / 60);
+            const diffHoras = Math.floor(diffMinutos / 60);
+            const diffDias = Math.floor(diffHoras / 24);
+            
+            const horas = diffHoras % 24;
+            const minutos = diffMinutos % 60;
+            const dataFormatada = ultimaData.toLocaleDateString('pt-BR');
+            
+            return {
+                dias: diffDias,
+                horas: horas,
+                minutos: minutos,
+                ultimoAcidente: dataFormatada
+            };
+        }
+        
+        // === CALCULAR HISTÓRICO MENSAL ===
+        function calcularHistoricoMensal() {
+            if (registros.length === 0) return { labels: ['Sem dados'], data: [0] };
+            
+            const acidentesPorMes = {};
+            registros.forEach(r => {
+                if (r.data) {
+                    let dataAtual = r.data;
+                    if (dataAtual.includes('/')) {
+                        const partes = dataAtual.split('/');
+                        dataAtual = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    }
+                    const dataObj = new Date(dataAtual);
+                    if (!isNaN(dataObj.getTime())) {
+                        const mesAno = `${dataObj.getFullYear()}-${String(dataObj.getMonth() + 1).padStart(2, '0')}`;
+                        if (!acidentesPorMes[mesAno]) {
+                            acidentesPorMes[mesAno] = [];
+                        }
+                        acidentesPorMes[mesAno].push(dataObj);
+                    }
+                }
+            });
+            
+            const mesesOrdenados = Object.keys(acidentesPorMes).sort();
+            const resultado = [];
+            let ultimoAcidente = null;
+            
+            mesesOrdenados.forEach(mes => {
+                const datas = acidentesPorMes[mes].sort((a, b) => a - b);
+                let diasSemAcidentes = 0;
+                
+                if (ultimoAcidente) {
+                    const primeiroDoMes = datas[0];
+                    const diffMs = primeiroDoMes - ultimoAcidente;
+                    diasSemAcidentes = Math.floor(diffMs / (1000 * 60 * 60 * 24)) - 1;
+                } else {
+                    const primeiroDoMes = datas[0];
+                    const inicioMes = new Date(primeiroDoMes.getFullYear(), primeiroDoMes.getMonth(), 1);
+                    const diffMs = primeiroDoMes - inicioMes;
+                    diasSemAcidentes = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                }
+                
+                ultimoAcidente = datas[datas.length - 1];
+                
+                const [ano, mesNum] = mes.split('-');
+                const nomeMes = new Date(parseInt(ano), parseInt(mesNum) - 1, 1).toLocaleDateString('pt-BR', { month: 'short' });
+                resultado.push({
+                    mes: `${nomeMes}/${ano}`,
+                    dias: Math.max(0, diasSemAcidentes)
+                });
+            });
+            
+            const agora = new Date();
+            const mesAtual = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
+            if (!acidentesPorMes[mesAtual]) {
+                let diasDesdeUltimo = 0;
+                if (ultimoAcidente) {
+                    const diffMs = agora - ultimoAcidente;
+                    diasDesdeUltimo = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                }
+                const [ano, mesNum] = mesAtual.split('-');
+                const nomeMes = new Date(parseInt(ano), parseInt(mesNum) - 1, 1).toLocaleDateString('pt-BR', { month: 'short' });
+                resultado.push({
+                    mes: `${nomeMes}/${ano}`,
+                    dias: Math.max(0, diasDesdeUltimo)
+                });
+            }
+            
+            return {
+                labels: resultado.map(r => r.mes),
+                data: resultado.map(r => r.dias)
+            };
+        }
+        
+        // === ATUALIZAR CONTADOR ===
+        function atualizarContador() {
+            const info = calcularDiasSemAcidentes();
+            
+            document.getElementById('diasCount').textContent = info.dias;
+            document.getElementById('horasCount').textContent = String(info.horas).padStart(2, '0');
+            document.getElementById('minutosCount').textContent = String(info.minutos).padStart(2, '0');
+            document.getElementById('ultimoAcidente').textContent = info.ultimoAcidente;
+        }
+        
+        // === ATUALIZAR GRÁFICO HISTÓRICO ===
+        function atualizarGraficoHistorico() {
+            const historico = calcularHistoricoMensal();
+            
+            if (charts.diasSemAcidentes) {
+                charts.diasSemAcidentes.data.labels = historico.labels;
+                charts.diasSemAcidentes.data.datasets[0].data = historico.data;
+                charts.diasSemAcidentes.update();
+            }
+        }
+
     </script>
 </body>
 </html>
