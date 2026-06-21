@@ -227,10 +227,10 @@
             <!-- GRÁFICOS 2x2 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-chart-column text-blue-600"></i>
-                        Acidentes por Período
-                    </h3>
+<h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+    <i class="fas fa-chart-line text-green-600"></i>
+    Períodos sem Acidentes
+</h3>
                     <div class="h-64"><canvas id="chartPeriodo"></canvas></div>
                 </div>
                 
@@ -263,92 +263,108 @@
             <div class="bg-white rounded-xl shadow p-6 mb-8">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                     <i class="fas fa-chart-line text-green-600"></i>
-                    Evolução dos Dias sem Acidentes
+                    Períodos sem Acidentes
+                    <span id="filtroStatus" class="text-xs font-normal text-slate-500 ml-2"></span>
                 </h3>
-                <p class="text-sm text-slate-500 mb-4">Histórico mensal do período sem acidentes</p>
+                <p class="text-sm text-slate-500 mb-4">Períodos entre acidentes (dias sem ocorrências)</p>
                 <div class="h-72"><canvas id="chartDiasSemAcidentes"></canvas></div>
             </div>
 
-            <!-- FILTROS E AÇÕES -->
-            <div class="bg-white rounded-xl shadow p-6 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-4">
-                    <select id="filterPeriodo" class="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="">Todos Períodos</option>
-                    </select>
+            <!-- FILTROS E AÇÕES (VERSÃO COMPACTA) -->
+            <div class="bg-white rounded-xl shadow p-4 mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Data Inicial</label>
+                        <input 
+                            type="date" 
+                            id="filterDataInicial" 
+                            class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                        >
+                    </div>
                     
-                    <select id="filterSetor" class="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="">Todos Setores</option>
-                    </select>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Data Final</label>
+                        <input 
+                            type="date" 
+                            id="filterDataFinal" 
+                            class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                        >
+                    </div>
                     
-                    <select id="filterTipo" class="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="">Todos Tipos</option>
-                    </select>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Setor</label>
+                        <select id="filterSetor" class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
                     
-                    <select id="filterUsuario" class="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="">Todos Usuários</option>
-                    </select>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Tipo</label>
+                        <select id="filterTipo" class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
                     
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        placeholder="Buscar..."
-                        class="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                    >
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Usuário</label>
+                        <select id="filterUsuario" class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
                     
-                    <button 
-                        onclick="clearFilters()"
-                        class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition"
-                    >
-                        <i class="fas fa-filter-circle-xmark mr-1"></i>Limpar
-                    </button>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Buscar</label>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Buscar..."
+                            class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                        >
+                    </div>
+                    
+                    <div class="flex items-end">
+                        <button 
+                            onclick="clearFilters()"
+                            class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1.5 rounded text-xs font-medium transition flex items-center justify-center gap-1"
+                        >
+                            <i class="fas fa-eraser text-[10px]"></i> Limpar
+                        </button>
+                    </div>
                 </div>
-                
-                <div class="flex flex-wrap gap-2">
-                    <button 
-                        onclick="openModal()"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow hover:shadow-lg"
-                    >
-                        <i class="fas fa-plus mr-2"></i>Novo Registro
-                    </button>
-                    
-                    <button 
-                        onclick="document.getElementById('csvInput').click()"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow hover:shadow-lg"
-                    >
-                        <i class="fas fa-file-import mr-2"></i>Importar CSV
-                    </button>
-                    <input type="file" id="csvInput" accept=".csv" class="hidden" onchange="importCSV(event)">
-                    
-                    <button 
-                        onclick="exportCSV()"
-                        class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow hover:shadow-lg"
-                    >
-                        <i class="fas fa-file-export mr-2"></i>Exportar CSV
-                    </button>
-                    
-                    <button 
-                        onclick="sincronizar()"
-                        class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow hover:shadow-lg"
-                    >
-                        <i class="fas fa-sync-alt mr-2"></i>Sincronizar
-                    </button>
-                </div>
+                <div id="filtroInfo" class="text-xs text-slate-500 mt-2 text-center"></div>
+            </div>
             </div>
 
             <!-- TABELA -->
             <div class="bg-white rounded-xl shadow overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-slate-100 border-b border-slate-200">
+                        <thead class="bg-gradient-to-r from-blue-600 to-blue-800 border-b border-blue-400">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Período</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Data</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Funcionário</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Setor</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Tipo</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Responsável</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase">Afastamento</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase">Ações</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-calendar-alt mr-1"></i>Período
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-calendar-day mr-1"></i>Data
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-user mr-1"></i>Funcionário
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-industry mr-1"></i>Setor
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-tags mr-1"></i>Tipo
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-user-check mr-1"></i>Responsável
+                                </th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-clock mr-1"></i>Afastamento
+                                </th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">
+                                    <i class="fas fa-cog mr-1"></i>Ações
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-slate-200">
@@ -614,19 +630,70 @@ function saveData() {
             renderTable(filtered);
             updateCharts(filtered);
             atualizarContador();
-            atualizarGraficoHistorico();
+            atualizarGraficoHistorico(filtered);
+            
+            // Mostrar informações dos filtros
+            const filtroInfo = document.getElementById('filtroInfo');
+            const dataInicial = document.getElementById('filterDataInicial').value;
+            const dataFinal = document.getElementById('filterDataFinal').value;
+            const setor = document.getElementById('filterSetor').value;
+            
+            let infoParts = [];
+            if (dataInicial || dataFinal) {
+                let periodo = 'Período: ';
+                if (dataInicial) periodo += formatDate(dataInicial);
+                if (dataInicial && dataFinal) periodo += ' até ';
+                if (dataFinal) periodo += formatDate(dataFinal);
+                infoParts.push(periodo);
+            }
+            if (setor) infoParts.push(`Setor: ${setor}`);
+            
+            filtroInfo.textContent = infoParts.length > 0 ? `🔍 ${infoParts.join(' | ')}` : '';
         }
         
         function getFilteredData() {
             let data = [...registros];
             
-            const fPeriodo = document.getElementById('filterPeriodo').value;
+            // NOVOS FILTROS DE DATA
+            const fDataInicial = document.getElementById('filterDataInicial').value;
+            const fDataFinal = document.getElementById('filterDataFinal').value;
             const fSetor = document.getElementById('filterSetor').value;
             const fTipo = document.getElementById('filterTipo').value;
             const fUsuario = document.getElementById('filterUsuario').value;
             const search = document.getElementById('searchInput').value.toUpperCase();
             
-            if (fPeriodo) data = data.filter(r => String(r.periodo).trim() === String(fPeriodo).trim());
+            // FILTRO POR DATA INICIAL
+            if (fDataInicial) {
+                const dataInicio = new Date(fDataInicial);
+                data = data.filter(r => {
+                    if (!r.data) return false;
+                    let dataAtual = r.data;
+                    if (dataAtual.includes('/')) {
+                        const partes = dataAtual.split('/');
+                        dataAtual = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    }
+                    const dataObj = new Date(dataAtual);
+                    return dataObj >= dataInicio;
+                });
+            }
+            
+            // FILTRO POR DATA FINAL
+            if (fDataFinal) {
+                const dataFim = new Date(fDataFinal);
+                // Adiciona 1 dia para incluir o dia inteiro
+                dataFim.setDate(dataFim.getDate() + 1);
+                data = data.filter(r => {
+                    if (!r.data) return false;
+                    let dataAtual = r.data;
+                    if (dataAtual.includes('/')) {
+                        const partes = dataAtual.split('/');
+                        dataAtual = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    }
+                    const dataObj = new Date(dataAtual);
+                    return dataObj < dataFim;
+                });
+            }
+            
             if (fSetor) data = data.filter(r => r.setor === fSetor);
             if (fTipo) data = data.filter(r => r.tipo === fTipo);
             if (fUsuario) data = data.filter(r => r.usuario === fUsuario);
@@ -694,12 +761,10 @@ function saveData() {
         
         // === FILTROS ===
         function updateFilters() {
-            const periodos = [...new Set(registros.map(r => r.periodo).filter(p => p))].sort().reverse();
             const setores = [...new Set(registros.map(r => r.setor).filter(s => s))].sort();
             const tipos = [...new Set(registros.map(r => r.tipo).filter(t => t))].sort();
             const usuarios = [...new Set(registros.map(r => r.usuario).filter(u => u))].sort();
             
-            populateSelect('filterPeriodo', periodos, 'Todos Períodos');
             populateSelect('filterSetor', setores, 'Todos Setores');
             populateSelect('filterTipo', tipos, 'Todos Tipos');
             populateSelect('filterUsuario', usuarios, 'Todos Usuários');
@@ -716,7 +781,8 @@ function saveData() {
         }
         
         function clearFilters() {
-            document.getElementById('filterPeriodo').value = '';
+            document.getElementById('filterDataInicial').value = '';
+            document.getElementById('filterDataFinal').value = '';
             document.getElementById('filterSetor').value = '';
             document.getElementById('filterTipo').value = '';
             document.getElementById('filterUsuario').value = '';
@@ -725,7 +791,7 @@ function saveData() {
             renderAll();
         }
         
-        ['filterPeriodo', 'filterSetor', 'filterTipo', 'filterUsuario', 'searchInput'].forEach(id => {
+        ['filterDataInicial', 'filterDataFinal', 'filterSetor', 'filterTipo', 'filterUsuario', 'searchInput'].forEach(id => {
             document.getElementById(id).addEventListener('change', () => { currentPage = 1; renderAll(); });
             document.getElementById(id).addEventListener('input', () => { currentPage = 1; renderAll(); });
         });
@@ -767,7 +833,7 @@ function saveData() {
                 const descritivoTrunc = descritivo.length > 50 ? descritivo.substring(0, 50) + '...' : descritivo;
                 
                 return `
-                    <tr class="hover:bg-slate-50 transition">
+                    <tr class="hover:bg-blue-50 transition duration-200">
                         <td class="px-4 py-3 text-sm text-slate-700">${r.periodo}</td>
                         <td class="px-4 py-3 text-sm text-slate-700">${formatDate(r.data)}</td>
                         <td class="px-4 py-3 text-sm font-medium text-slate-900">${r.funcionario}</td>
@@ -1247,76 +1313,78 @@ function sincronizar() {
         }
         
         // === CALCULAR HISTÓRICO MENSAL ===
-        function calcularHistoricoMensal() {
-            if (registros.length === 0) return { labels: ['Sem dados'], data: [0] };
+        // === CALCULAR PERÍODOS SEM ACIDENTES ===
+        function calcularPeriodosSemAcidentes(dados) {
+            // Se não receber dados, usa todos os registros
+            if (!dados) dados = registros;
             
-            const acidentesPorMes = {};
-            registros.forEach(r => {
+            if (dados.length === 0) {
+                return { labels: ['Sem dados'], data: [0] };
+            }
+            
+            // Pegar todas as datas de acidentes e ordenar
+            let datas = [];
+            dados.forEach(r => {  // ← USA 'dados' (PODE SER FILTRADO)
                 if (r.data) {
                     let dataAtual = r.data;
+                    // Converter formato dd/mm/aaaa para Date
                     if (dataAtual.includes('/')) {
                         const partes = dataAtual.split('/');
                         dataAtual = `${partes[2]}-${partes[1]}-${partes[0]}`;
                     }
                     const dataObj = new Date(dataAtual);
                     if (!isNaN(dataObj.getTime())) {
-                        const mesAno = `${dataObj.getFullYear()}-${String(dataObj.getMonth() + 1).padStart(2, '0')}`;
-                        if (!acidentesPorMes[mesAno]) {
-                            acidentesPorMes[mesAno] = [];
-                        }
-                        acidentesPorMes[mesAno].push(dataObj);
+                        datas.push(dataObj);
                     }
                 }
             });
             
-            const mesesOrdenados = Object.keys(acidentesPorMes).sort();
-            const resultado = [];
-            let ultimoAcidente = null;
+            // Ordenar datas (da mais antiga para a mais recente)
+            datas.sort((a, b) => a - b);
             
-            mesesOrdenados.forEach(mes => {
-                const datas = acidentesPorMes[mes].sort((a, b) => a - b);
-                let diasSemAcidentes = 0;
-                
-                if (ultimoAcidente) {
-                    const primeiroDoMes = datas[0];
-                    const diffMs = primeiroDoMes - ultimoAcidente;
-                    diasSemAcidentes = Math.floor(diffMs / (1000 * 60 * 60 * 24)) - 1;
-                } else {
-                    const primeiroDoMes = datas[0];
-                    const inicioMes = new Date(primeiroDoMes.getFullYear(), primeiroDoMes.getMonth(), 1);
-                    const diffMs = primeiroDoMes - inicioMes;
-                    diasSemAcidentes = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                }
-                
-                ultimoAcidente = datas[datas.length - 1];
-                
-                const [ano, mesNum] = mes.split('-');
-                const nomeMes = new Date(parseInt(ano), parseInt(mesNum) - 1, 1).toLocaleDateString('pt-BR', { month: 'short' });
-                resultado.push({
-                    mes: `${nomeMes}/${ano}`,
-                    dias: Math.max(0, diasSemAcidentes)
-                });
-            });
+            // Calcular dias entre os acidentes
+            const periodos = [];
+            const labels = [];
             
-            const agora = new Date();
-            const mesAtual = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
-            if (!acidentesPorMes[mesAtual]) {
-                let diasDesdeUltimo = 0;
-                if (ultimoAcidente) {
-                    const diffMs = agora - ultimoAcidente;
-                    diasDesdeUltimo = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                }
-                const [ano, mesNum] = mesAtual.split('-');
-                const nomeMes = new Date(parseInt(ano), parseInt(mesNum) - 1, 1).toLocaleDateString('pt-BR', { month: 'short' });
-                resultado.push({
-                    mes: `${nomeMes}/${ano}`,
-                    dias: Math.max(0, diasDesdeUltimo)
-                });
+            // Primeiro período: dias desde o início até o primeiro acidente
+            if (datas.length > 0) {
+                // Para o primeiro acidente, consideramos o início do mês
+                const primeiraData = datas[0];
+                const inicioMes = new Date(primeiraData.getFullYear(), primeiraData.getMonth(), 1);
+                const diffMs = primeiraData - inicioMes;
+                const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                
+                const nomeMes = primeiraData.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+                labels.push(`Início - ${nomeMes}`);
+                periodos.push(dias);
+            }
+            
+            // Períodos entre acidentes
+            for (let i = 1; i < datas.length; i++) {
+                const diffMs = datas[i] - datas[i-1];
+                const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24)) - 1; // -1 porque o dia do acidente não conta
+                
+                const dataAnterior = datas[i-1].toLocaleDateString('pt-BR');
+                const dataAtual = datas[i].toLocaleDateString('pt-BR');
+                labels.push(`${dataAnterior} → ${dataAtual}`);
+                periodos.push(Math.max(0, dias));
+            }
+            
+            // Período atual (desde o último acidente até hoje)
+            if (datas.length > 0) {
+                const ultimoAcidente = datas[datas.length - 1];
+                const agora = new Date();
+                const diffMs = agora - ultimoAcidente;
+                const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                
+                const dataUltimo = ultimoAcidente.toLocaleDateString('pt-BR');
+                labels.push(`${dataUltimo} → Hoje`);
+                periodos.push(Math.max(0, dias));
             }
             
             return {
-                labels: resultado.map(r => r.mes),
-                data: resultado.map(r => r.dias)
+                labels: labels,
+                data: periodos
             };
         }
         
@@ -1330,9 +1398,9 @@ function sincronizar() {
             document.getElementById('ultimoAcidente').textContent = info.ultimoAcidente;
         }
         
-        // === ATUALIZAR GRÁFICO HISTÓRICO ===
-        function atualizarGraficoHistorico() {
-            const historico = calcularHistoricoMensal();
+        // === ATUALIZAR GRÁFICO DE PERÍODOS ===
+        function atualizarGraficoHistorico(dadosFiltrados) {
+            const historico = calcularPeriodosSemAcidentes(dadosFiltrados);
             
             if (charts.diasSemAcidentes) {
                 charts.diasSemAcidentes.data.labels = historico.labels;
